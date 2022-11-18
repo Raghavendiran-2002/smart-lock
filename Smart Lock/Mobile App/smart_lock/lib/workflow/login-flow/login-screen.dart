@@ -12,14 +12,14 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            fit: BoxFit.cover,
-            image: Image.asset(
-              'assets/images/food1.jpg',
-            ).image,
-          ),
-        ),
+        // decoration: BoxDecoration(
+        //   image: DecorationImage(
+        //     fit: BoxFit.cover,
+        //     image: Image.asset(
+        //       'assets/images/food1.jpg',
+        //     ).image,
+        //   ),
+        // ),
         child: Padding(
           padding: EdgeInsets.only(bottom: 15),
           child: Column(

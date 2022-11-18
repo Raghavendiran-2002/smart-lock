@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_lock/workflow/home-flow/screens/homeScreen.dart';
+import 'package:smart_lock/workflow/lock-flow/screens/lockScreen.dart';
 import 'package:smart_lock/workflow/login-flow/login-screen.dart';
 
 void main() async {
@@ -28,17 +29,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Foodly',
-      // initialRoute:
-      //     getInitRoute(), //uncomment for dynamic routing based on user login state
-      //change initial state only for required start point
-      initialRoute: "qr",
+      initialRoute: "lock",
       routes: {
         "/": (context) => LoginScreen(),
         "home": (context) => HomeScreen(
               userUID: _userUID!,
               phoneNumber: _phoneNumber!,
             ),
-        // "qr": (context) => QRScreen(),
+        "lock": (context) => LockScreen(),
       },
     );
   }
