@@ -2,8 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_lock/workflow/home-flow/screens/homeScreen.dart';
-import 'package:smart_lock/workflow/livevideo-flow/screens/liveVideo.dart';
-import 'package:smart_lock/workflow/lock-flow/screens/lockScreen.dart';
 import 'package:smart_lock/workflow/login-flow/screens/LoginScreen.dart';
 
 void main() async {
@@ -31,15 +29,13 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Foodly',
       // initialRoute: "livevideo",
-      initialRoute: "/",
+      initialRoute: "home",
       routes: {
         "/": (context) => LoginScreen(),
         "home": (context) => HomeScreen(
             // userUID: _userUID!,
             // phoneNumber: _phoneNumber!,
             ),
-        "lock": (context) => LockScreen(),
-        "livevideo": (context) => LiveVideo_Screen(),
         // "login": (context) => LoginScreen(),
       },
     );

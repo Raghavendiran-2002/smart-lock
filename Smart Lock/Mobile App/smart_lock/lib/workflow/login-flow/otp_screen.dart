@@ -93,10 +93,6 @@ class _OTPScreenState extends State<OTPScreen> {
                     SizedBox(
                       height: 10,
                     ),
-                    // Image.asset(
-                    //   'assets/images/green1.jpg',
-                    //   height: 200,
-                    // ),
                     SizedBox(
                       height: 20,
                     ),

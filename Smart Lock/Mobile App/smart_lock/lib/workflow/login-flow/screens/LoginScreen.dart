@@ -93,7 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     Text(
-                      "Team TORQ",
+                      "SmartLock",
                       style: TextStyle(
                         fontFamily: "Poppins",
                         color: Colors.white,
