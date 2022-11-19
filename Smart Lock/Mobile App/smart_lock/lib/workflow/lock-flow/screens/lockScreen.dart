@@ -10,7 +10,7 @@ class LockScreen extends StatefulWidget {
 }
 
 class _LockScreenState extends State<LockScreen> {
-  bool status = false;
+  bool toggleStatus = false;
   var dio = Dio();
 
   void getHttp() async {
@@ -25,24 +25,15 @@ class _LockScreenState extends State<LockScreen> {
           // status = false;
         });
       }
-      // if (response == "true"){
-      //   status = true;
-      // }
     } catch (e) {
       print(e);
     }
   }
 
-  void sendResponse() async {
-    var formData = FormData.fromMap({
-      'name': 'wendux',
-      'age': 25,
-    });
-    // Response response = await dio.post('http://192.168.128.235:3000/test',
-    //     data: {'id': 12, 'name': 'wendu'});
-    Response response =
-        await dio.post('http://192.168.128.235:3000/test', data: formData);
-    print(response.data);
+  void sendResponse(status, deviceID) async {
+    Response response = await dio.post('http://13.127.183.39:3000/test',
+        data: {"deviceID": deviceID, "status": status});
+    print(response.data['status']);
   }
 
   @override
@@ -65,14 +56,14 @@ class _LockScreenState extends State<LockScreen> {
             height: 55.0,
             valueFontSize: 25.0,
             toggleSize: 45.0,
-            value: status,
+            value: toggleStatus,
             borderRadius: 30.0,
             padding: 8.0,
             showOnOff: true,
             onToggle: (val) {
               setState(() {
-                status = val;
-                sendResponse();
+                sendResponse(val, "01");
+                toggleStatus = val;
               });
             },
           ),

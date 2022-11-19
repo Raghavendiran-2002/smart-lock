@@ -18,70 +18,6 @@ class PhoneNumberScreen extends StatefulWidget {
 class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
   String phoneNumber = "0000000000";
   bool phoneFieldInit = false;
-  List<ElevatedButton> getKeypadChildren() {
-    List<ElevatedButton> children = List.generate(
-      10,
-      (index) => ElevatedButton(
-        onPressed: () {
-          phoneFieldController((index + 1).toString());
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15.0),
-          ),
-        ),
-        child: Text(
-          index == 9 ? "" : "${index + 1}",
-          style: TextStyle(
-            fontSize: 25,
-            color: Colors.black,
-          ),
-        ),
-      ),
-    );
-    children.add(
-      ElevatedButton(
-        onPressed: () {
-          phoneFieldController("0");
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15.0),
-          ),
-        ),
-        child: Text(
-          "0",
-          style: TextStyle(
-            fontSize: 25,
-            color: Colors.black,
-          ),
-        ),
-      ),
-    );
-    children.add(
-      ElevatedButton(
-        onPressed: () {
-          phoneFieldController("-1");
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15.0),
-          ),
-        ),
-        child: Icon(
-          Icons.backspace_outlined,
-          color: Colors.black,
-        ),
-      ),
-    );
-    return children;
-  }
 
   late Timer timer;
 
@@ -341,20 +277,20 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
               ],
             ),
           ),
-          Expanded(
-            child: Container(
-              padding: EdgeInsets.symmetric(vertical: 20, horizontal: 22),
-              color: Color(0xFFF6F5FA),
-              child: GridView.count(
-                physics: NeverScrollableScrollPhysics(),
-                crossAxisCount: 3,
-                childAspectRatio: 1.8,
-                mainAxisSpacing: 15,
-                crossAxisSpacing: 20,
-                children: getKeypadChildren(),
-              ),
-            ),
-          ),
+          // Expanded(
+          //   child: Container(
+          //     padding: EdgeInsets.symmetric(vertical: 20, horizontal: 22),
+          //     color: Color(0xFFF6F5FA),
+          //     child: GridView.count(
+          //       physics: NeverScrollableScrollPhysics(),
+          //       crossAxisCount: 3,
+          //       childAspectRatio: 1.8,
+          //       mainAxisSpacing: 15,
+          //       crossAxisSpacing: 20,
+          //       children: getKeypadChildren(),
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );

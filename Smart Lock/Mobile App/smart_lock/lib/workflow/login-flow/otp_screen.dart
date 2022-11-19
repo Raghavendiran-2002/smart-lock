@@ -93,10 +93,10 @@ class _OTPScreenState extends State<OTPScreen> {
                     SizedBox(
                       height: 10,
                     ),
-                    Image.asset(
-                      'assets/images/green1.jpg',
-                      height: 200,
-                    ),
+                    // Image.asset(
+                    //   'assets/images/green1.jpg',
+                    //   height: 200,
+                    // ),
                     SizedBox(
                       height: 20,
                     ),
@@ -172,9 +172,9 @@ class _OTPScreenState extends State<OTPScreen> {
                                     Navigator.of(context).push(
                                       MaterialPageRoute(
                                         builder: (context) => HomeScreen(
-                                          phoneNumber: widget.phoneNumber,
-                                          userUID: auth.currentUser!.uid,
-                                        ),
+                                            // phoneNumber: widget.phoneNumber,
+                                            // userUID: auth.currentUser!.uid,
+                                            ),
                                       ),
                                     );
                                   } catch (e) {
