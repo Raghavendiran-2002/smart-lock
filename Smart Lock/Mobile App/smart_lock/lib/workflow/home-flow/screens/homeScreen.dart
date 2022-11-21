@@ -1,9 +1,8 @@
-import 'package:blurrycontainer/blurrycontainer.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_switch/flutter_switch.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:lottie/lottie.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -11,7 +10,8 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
+  late final AnimationController _controller;
   final Uri _url = Uri.parse('http://192.168.29.99:5012/video_feed');
   bool toggleStatus = false;
   bool internetConnectivity = false;
@@ -49,6 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _controller = AnimationController(vsync: this);
   }
 
   @override
@@ -84,80 +85,140 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-      body: SafeArea(
-        child: Center(
+      body: SingleChildScrollView(
+        child: SafeArea(
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Image.asset(
-                "assets/images/Door.png",
+              Container(
+                height: 150,
+                width: 150,
+                child: InkWell(
+                  onTap: () {
+                    switch (_controller.status) {
+                      case AnimationStatus.completed:
+                        _controller.reverse();
+                        break;
+                      case AnimationStatus.dismissed:
+                        _controller.forward();
+                        break;
+                      default:
+                    }
+                  },
+                  child: Lottie.asset(
+                    'assets/images/passwordlock.json',
+                    controller: _controller,
+                    onLoaded: (composition) {
+                      // Configure the AnimationController with the duration of the
+                      // Lottie file and start the animation.
+                      _controller
+                        ..duration = composition.duration
+                        ..forward();
+                    },
+                  ),
+                ),
               ),
               SizedBox(
                 height: 10,
               ),
-              BlurryContainer(
-                child: Column(
-                  children: [
-                    Text("h"),
-                    SizedBox(
-                      height: 40,
-                    ),
-                    FlutterSwitch(
-                      width: 130.0,
-                      height: 50.0,
-                      valueFontSize: 25.0,
-                      toggleSize: 45.0,
-                      value: toggleStatus,
-                      borderRadius: 40.0,
-                      padding: 8.0,
-                      activeText: "unlock",
-                      inactiveText: "lock  ",
-                      inactiveIcon: Icon(Icons.lock_outline),
-                      activeIcon: Icon(Icons.lock_open),
-                      showOnOff: true,
-                      onToggle: (val) {
-                        setState(() {
-                          sendResponse(val, "01");
-                          toggleStatus = val;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-                blur: 5,
-                width: 350,
-                height: 200,
-                elevation: 0,
-                color: Color(0xFF666CDB),
-                padding: const EdgeInsets.all(8),
-                borderRadius: const BorderRadius.all(Radius.circular(20)),
-              ),
+              // BlurryContainer(
+              //   child: Column(
+              //     children: [
+              //       Text("h"),
+              //       SizedBox(
+              //         height: 40,
+              //       ),
+              //       FlutterSwitch(
+              //         width: 130.0,
+              //         height: 50.0,
+              //         valueFontSize: 25.0,
+              //         toggleSize: 45.0,
+              //         value: toggleStatus,
+              //         borderRadius: 40.0,
+              //         padding: 8.0,
+              //         activeText: "unlock",
+              //         inactiveText: "lock  ",
+              //         inactiveIcon: Icon(Icons.lock_outline),
+              //         activeIcon: Icon(Icons.lock_open),
+              //         showOnOff: true,
+              //         onToggle: (val) {
+              //           setState(() {
+              //             sendResponse(val, "01");
+              //             toggleStatus = val;
+              //           });
+              //         },
+              //       ),
+              //     ],
+              //   ),
+              //   blur: 5,
+              //   width: 350,
+              //   height: 200,
+              //   elevation: 0,
+              //   color: Color(0xFF666CDB),
+              //   padding: const EdgeInsets.all(8),
+              //   borderRadius: const BorderRadius.all(Radius.circular(20)),
+              // ),
               SizedBox(
                 height: 20,
               ),
-              Container(
-                height: 70,
-                width: 350,
-                decoration: BoxDecoration(
-                    color: Colors.blueAccent,
-                    border: Border.all(
-                      color: Colors.black,
-                      width: 2.0,
+              InkWell(
+                onTap: () {
+                  switch (_controller.status) {
+                    case AnimationStatus.completed:
+                      _controller.reverse();
+                      break;
+                    case AnimationStatus.dismissed:
+                      _controller.forward();
+                      break;
+                    default:
+                  }
+                },
+                child: Container(
+                  height: 150,
+                  width: 150,
+                  child: InkWell(
+                    onTap: () {
+                      _launchUrl();
+                    },
+                    child: Lottie.asset(
+                      'assets/images/securitycamera.json',
+                      controller: _controller,
+                      onLoaded: (composition) {
+                        // Configure the AnimationController with the duration of the
+                        // Lottie file and start the animation.
+                        _controller
+                          ..duration = composition.duration
+                          ..forward();
+                      },
                     ),
-                    borderRadius: BorderRadius.circular(10.0),
-                    gradient: const LinearGradient(
-                        colors: [Colors.black, Colors.greenAccent]),
-                    boxShadow: const [
-                      BoxShadow(
-                          color: Colors.grey,
-                          blurRadius: 2.0,
-                          offset: Offset(2.0, 2.0))
-                    ]),
-                child: ElevatedButton.icon(
-                  label: Text('View Camera'),
-                  icon: Icon(Icons.video_camera_back),
-                  onPressed: _launchUrl,
+                  ),
                 ),
-              )
+              ),
+              // Container(
+              //   height: 70,
+              //   width: 350,
+              //   decoration: BoxDecoration(
+              //       color: Colors.blueAccent,
+              //       border: Border.all(
+              //         color: Colors.black,
+              //         width: 2.0,
+              //       ),
+              //       borderRadius: BorderRadius.circular(10.0),
+              //       gradient: const LinearGradient(
+              //           colors: [Colors.black, Colors.greenAccent]),
+              //       boxShadow: const [
+              //         BoxShadow(
+              //             color: Colors.grey,
+              //             blurRadius: 2.0,
+              //             offset: Offset(2.0, 2.0))
+              //       ]),
+              //   child: ElevatedButton.icon(
+              //     label: Text('View Camera'),
+              //     icon: Icon(Icons.video_camera_back),
+              //     onPressed: _launchUrl,
+              //   ),
+              // )
             ],
           ),
         ),
