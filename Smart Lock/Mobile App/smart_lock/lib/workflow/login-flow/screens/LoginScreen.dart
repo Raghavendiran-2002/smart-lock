@@ -12,6 +12,8 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  bool isLoading = false;
+
   final RoundedLoadingButtonController _btnController =
       RoundedLoadingButtonController();
   void login() async {
@@ -57,7 +59,6 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
-  bool isLoading = false;
   bool borderVisible = true;
 
   @override

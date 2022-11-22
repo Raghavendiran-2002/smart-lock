@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:pinput/pinput.dart';
-import 'package:smart_lock/workflow/login-flow/services/phoneNumber_Helper.dart';
 
 import '../home-flow/screens/homeScreen.dart';
 
@@ -77,18 +76,6 @@ class _OTPScreenState extends State<OTPScreen> {
                     ),
                     SizedBox(
                       height: 10,
-                    ),
-                    Text(
-                      "We sent a verification code\nto ${() {
-                        return PhoneNumberHelper()
-                            .formatPhoneNumberWithCountryCode(
-                                widget.phoneNumber, 2);
-                      }()}",
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      textAlign: TextAlign.center,
                     ),
                     SizedBox(
                       height: 10,

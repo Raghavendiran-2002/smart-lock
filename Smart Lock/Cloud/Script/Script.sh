@@ -6,9 +6,9 @@ echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb
 wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.16_amd64.deb
 sudo dpkg -i ./libssl1.1_1.1.1f-1ubuntu2.16_amd64.deb
 sudo apt update
-sudo apt install mongodb-org
+sudo apt install -y mongodb-org
 sudo systemctl enable --now mongod
-sudo nano /etc/mongod.conf  # 127.0.0.1 => 0.0.0.0
+# sudo nano /etc/mongod.conf  # 127.0.0.1 => 0.0.0.0
 sudo systemctl restart mongod
 sudo systemctl stop mongod.service
 rm -r libssl1.1_1.1.1f-1ubuntu2.16_amd64.deb
@@ -25,8 +25,8 @@ sudo systemctl start mongod
 sudo add-apt-repository ppa:mosquitto-dev/mosquitto-ppa -y
 sudo apt install -y mosquitto mosquitto-clients
 sudo ufw allow 1883
-sudo apt install net-tools
+sudo apt install -y net-tools
 sudo nano /etc/mosquitto/mosquitto.conf # listener 1883
                                         # allow_anonymous true
 sudo service mosquitto restart
-                                      
+

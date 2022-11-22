@@ -1,0 +1,18 @@
+version: '3'
+services:
+  app:
+    container_name: restapi
+    restart: always
+    build: .
+    ports:
+      - '3000:3000'
+    external_links:
+      - mongo
+  mongo:
+    container_name: mongo
+    command: 
+      - '--logpath'
+      - '/var/log/mongodb/mongod.log'
+    image: mongo
+    ports:
+      - '27017:27017'
