@@ -3,8 +3,8 @@
 #include <ArduinoJson.h>
 
 // WiFi
-const char *ssid = "SANJAIRAM"; // Enter your WiFi name
-const char *password = "sanjai@3031";  // Enter WiFi password
+const char *ssid = "Raghavendiran"; // Enter your WiFi name
+const char *password = "apple@5g";  // Enter WiFi password
 
 // MQTT Broker
 const char *mqtt_broker = "13.235.99.169";
@@ -12,16 +12,17 @@ const char *topic = "/lock/status";
 //const char *mqtt_username = "emqx";
 //const char *mqtt_password = "public";
 const int mqtt_port = 1883;
-const int motionSensor = 27;
 
 WiFiClient espClient;
 PubSubClient client(espClient);
 
 void setup() {
    Serial.begin(115200);
+   pinMode(2, OUTPUT);
+   digitalWrite(2, HIGH);
    WiFi.begin(ssid, password);
    WifiConnect();
-   MotionDetector();
+  
    PublishMessage();
    client.subscribe(topic);
 }
@@ -49,35 +50,35 @@ void WifiConnect(){
     }
 }
 
-void IRAM_ATTR detectsMovement() {
-  Serial.println("MOTION DETECTED!!!");
-}
-
-void MotionDetector(){
-   pinMode(motionSensor, INPUT_PULLUP);
-   attachInterrupt(digitalPinToInterrupt(motionSensor), detectsMovement, RISING);  
-}
-
 void PublishMessage(){
   DynamicJsonDocument doc(1024);
-
   doc["status"] = true;
-  doc["motion"] = false;
   doc["nodeID"] = "0x01";
   char message[100];
   serializeJson(doc, message);
-  client.publish(topic, message);
+//  client.publish(topic, message);
 }
 
 void callback(char *topic, byte *payload, unsigned int length) {
  Serial.print("Message arrived in topic: ");
  Serial.println(topic);
  Serial.print("Message:");
+ char message[length];
  for (int i = 0; i < length; i++) {
-     Serial.print((char) payload[i]);
+  message[i] = ((char)payload[i]);
  }
- Serial.println();
- Serial.println("-----------------------");
+ DynamicJsonDocument doc(64); 
+ deserializeJson(doc, message);
+ bool state = doc["status"]; 
+ const char* deviceUID = doc["nodeID"]; 
+ if (state == true){
+        Serial.println("Lock is OPEN");
+        digitalWrite(2, LOW);
+ }
+ else {
+        digitalWrite(2, HIGH);
+        Serial.println("Lock is CLOSED");
+ }
 }
 
 void loop() {

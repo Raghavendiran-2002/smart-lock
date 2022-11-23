@@ -6,7 +6,7 @@ const lockstatus = require("../models/lockstatus");
 router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
 
-router.post("/postLockStatus", (req, res) => {
+router.post("/createLockStatus", (req, res) => {
   lockstatus
     .create({
       nodeId: req.body.nodeId,
@@ -18,6 +18,26 @@ router.post("/postLockStatus", (req, res) => {
       return res.status(201).json({
         success: true,
         message: "Data Added Successfully",
+        quality: status,
+      });
+    })
+    .catch((err) => {
+      return res.status(500).json({ success: false, message: err.message });
+    });
+});
+
+router.post("/updateLockStatus", (req, res) => {
+  lockstatus
+    .find({ nodeId: req.body.nodeId })
+    .updateOne({
+      nodeId: req.body.nodeId,
+      status: req.body.status,
+    })
+    .then((status) => {
+      console.log(`lock status... ID updated: ${req.body.nodeId}`);
+      return res.status(201).json({
+        success: true,
+        message: "Data Updated Successfully",
         quality: status,
       });
     })
