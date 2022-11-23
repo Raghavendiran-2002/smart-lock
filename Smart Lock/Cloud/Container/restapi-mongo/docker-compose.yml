@@ -15,4 +15,4 @@ services:
       - '/var/log/mongodb/mongod.log'
     image: mongo
     ports:
-      - '27017:27017'
+      - '27018:27017'

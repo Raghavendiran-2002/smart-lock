@@ -7,7 +7,7 @@ const port = "1883";
 const clientId = `mqtt_${Math.random().toString(16).slice(3)}`;
 
 mongoose
-  .connect("mongodb://localhost:27017/", {
+  .connect("mongodb://localhost:27018/", {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
@@ -37,15 +37,15 @@ client.on("message", (topic, payload) => {
     if (msg["status"] == true) {
       console.log("Lock is Open");
       lockstatus
-        .create({
-          status: "true",
-          nodeId: "0x0d1",
-        })
-        // .find({ nodeId: "0x01" })
-        // .updateOne({
+        // .create({
+        //   status: "true",
         //   nodeId: "0x01",
-        //   status: "poi",
         // })
+        .find({ nodeId: "0x01" })
+        .updateOne({
+          nodeId: "0x01",
+          status: "poi",
+        })
         .then((status) => {
           console.log(`lock status... ID updated: `);
           return console.log({
