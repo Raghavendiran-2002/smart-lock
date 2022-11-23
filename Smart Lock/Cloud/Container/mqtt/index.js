@@ -9,7 +9,7 @@ const client = mqtt.connect(connectUrl, {
   clientId,
 });
 
-const topic = "/nodejs/mqtt";
+const topic = "/lock/status";
 client.on("connect", () => {
   console.log("Connected");
   client.subscribe([topic], () => {

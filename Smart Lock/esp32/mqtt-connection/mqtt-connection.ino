@@ -1,48 +1,72 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
+#include <ArduinoJson.h>
 
 // WiFi
-const char *ssid = "mousse"; // Enter your WiFi name
-const char *password = "qweqweqwe";  // Enter WiFi password
+const char *ssid = "SANJAIRAM"; // Enter your WiFi name
+const char *password = "sanjai@3031";  // Enter WiFi password
 
 // MQTT Broker
-const char *mqtt_broker = "broker.emqx.io";
-const char *topic = "esp32/test";
-const char *mqtt_username = "emqx";
-const char *mqtt_password = "public";
+const char *mqtt_broker = "13.235.99.169";
+const char *topic = "/lock/status";
+//const char *mqtt_username = "emqx";
+//const char *mqtt_password = "public";
 const int mqtt_port = 1883;
+const int motionSensor = 27;
 
 WiFiClient espClient;
 PubSubClient client(espClient);
 
 void setup() {
- // Set software serial baud to 115200;
- Serial.begin(115200);
- // connecting to a WiFi network
- WiFi.begin(ssid, password);
- while (WiFi.status() != WL_CONNECTED) {
-     delay(500);
-     Serial.println("Connecting to WiFi..");
- }
- Serial.println("Connected to the WiFi network");
- //connecting to a mqtt broker
- client.setServer(mqtt_broker, mqtt_port);
- client.setCallback(callback);
- while (!client.connected()) {
-     String client_id = "esp32-client-";
-     client_id += String(WiFi.macAddress());
-     Serial.printf("The client %s connects to the public mqtt broker\n", client_id.c_str());
-     if (client.connect(client_id.c_str(), mqtt_username, mqtt_password)) {
-         Serial.println("Public emqx mqtt broker connected");
-     } else {
-         Serial.print("failed with state ");
-         Serial.print(client.state());
-         delay(2000);
-     }
- }
- // publish and subscribe
- client.publish(topic, "Hi EMQX I'm ESP32 ^^");
- client.subscribe(topic);
+   Serial.begin(115200);
+   WiFi.begin(ssid, password);
+   WifiConnect();
+   MotionDetector();
+   PublishMessage();
+   client.subscribe(topic);
+}
+
+void WifiConnect(){
+    while (WiFi.status() != WL_CONNECTED) {
+      delay(500);
+      Serial.println("Connecting to WiFi..");
+    }
+   Serial.println("Connected to the WiFi network");
+   client.setServer(mqtt_broker, mqtt_port);
+   client.setCallback(callback);
+   while (!client.connected()) {
+       String client_id = "esp32-client-";
+       client_id += String(WiFi.macAddress());
+       Serial.printf("The client %s connects to the public aws mqtt broker\n", client_id.c_str());
+       //if (client.connect(client_id.c_str(), mqtt_username, mqtt_password)) {
+       if (client.connect(client_id.c_str())) {
+           Serial.println("Public AWS broker connected");
+       } else {
+           Serial.print("failed with state ");
+           Serial.print(client.state());
+           delay(2000);
+       }
+    }
+}
+
+void IRAM_ATTR detectsMovement() {
+  Serial.println("MOTION DETECTED!!!");
+}
+
+void MotionDetector(){
+   pinMode(motionSensor, INPUT_PULLUP);
+   attachInterrupt(digitalPinToInterrupt(motionSensor), detectsMovement, RISING);  
+}
+
+void PublishMessage(){
+  DynamicJsonDocument doc(1024);
+
+  doc["status"] = true;
+  doc["motion"] = false;
+  doc["nodeID"] = "0x01";
+  char message[100];
+  serializeJson(doc, message);
+  client.publish(topic, message);
 }
 
 void callback(char *topic, byte *payload, unsigned int length) {
