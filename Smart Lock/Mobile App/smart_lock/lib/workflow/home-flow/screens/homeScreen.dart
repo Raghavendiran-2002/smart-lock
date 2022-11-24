@@ -23,23 +23,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late var nodeStatus;
   late var nodeID;
   var dio = Dio();
-  final db = FirebaseFirestore.instance;
-
-  void getDevices() async {
-    var temp = await FirebaseFirestore.instance.collection("lock").get();
-    docs = temp.docs;
-    for (var doc in docs) {
-      streams.add(
-        FirebaseFirestore.instance
-            .collection('lock')
-            .where(FieldPath.documentId, isEqualTo: doc.id)
-            .snapshots(),
-      );
-    }
-    setState(() {
-      isLoading = false;
-    });
-  }
+  final firestoreInstance = FirebaseFirestore.instance;
 
   Future<void> _launchUrl() async {
     if (!await launchUrl(_url)) {
@@ -49,8 +33,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   void getHttp() async {
     try {
-      var response =
-          await Dio().get('http://13.235.99.169:8000/lock/getByNode/ragsdgsdf');
+      var response = await Dio().get('http://localhost:3000/lock/getNodeID/');
       print(response.data['values'][0]['nodeId']); // access the json data
       print(response.data.toString()); // Prints the Data
       if (response.statusCode == 200) {}
@@ -61,18 +44,33 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   void sendResponse(status, deviceID) async {
     Response response = await dio.post(
-        'http://13.235.99.169:8000/lock/postLockStatus',
+        'http://13.235.99.169:3000/lock/postLockStatus',
         data: {"nodeId": "poiopu", "status": "pdsgd", "motion": "gfdg"});
     print(response.data['status']);
   }
 
+  void _onPressed() {
+    firestoreInstance.collection("lock").snapshots().listen((result) {
+      result.docChanges.forEach((res) {
+        if (res.type == DocumentChangeType.added) {
+          print("added");
+          print(res.doc.data());
+        } else if (res.type == DocumentChangeType.modified) {
+          print("modified");
+          print(res.doc.data());
+          // getHttp();
+        } else if (res.type == DocumentChangeType.removed) {
+          print("removed");
+          print(res.doc.data());
+        }
+      });
+    });
+  }
+
   @override
   void initState() {
-    getDevices();
-
     super.initState();
-    // sendResponse(":hg", "jhg");
-    // _controller = AnimationController(vsync: this);
+    _onPressed();
   }
 
   @override
