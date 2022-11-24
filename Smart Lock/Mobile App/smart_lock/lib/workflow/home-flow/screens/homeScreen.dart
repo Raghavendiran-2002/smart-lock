@@ -110,197 +110,130 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
       body: SingleChildScrollView(
         child: SafeArea(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              isLoading
-                  ? CircularProgressIndicator()
-                  : GridView.builder(
-                      physics: NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      itemCount: streams.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white54,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Container(
+                //   height: 150,
+                //   width: 150,
+                //   child: InkWell(
+                //     onTap: () {
+                //       switch (_controller.status) {
+                //         case AnimationStatus.completed:
+                //           _controller.reverse();
+                //           break;
+                //         case AnimationStatus.dismissed:
+                //           _controller.forward();
+                //           break;
+                //         default:
+                //       }
+                //     },
+                //     child: Lottie.asset(
+                //       'assets/images/passwordlock.json',
+                //       controller: _controller,
+                //       onLoaded: (composition) {
+                //         // Configure the AnimationController with the duration of the
+                //         // Lottie file and start the animation.
+                //         _controller
+                //           ..duration = composition.duration
+                //           ..forward();
+                //       },
+                //     ),
+                //   ),
+                // ),
+                SizedBox(
+                  height: 10,
+                ),
+                Container(
+                    width: 330,
+                    height: 170,
+                    //BoxDecoration Widget
+                    decoration: BoxDecoration(
+                      //DecorationImage
+                      border: Border.all(
+                        color: Color(0xFF666CDB),
+                        width: 2,
+                      ),
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Text("Smart Lock 1"),
+                        Expanded(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
-                              Text(
-                                docs[index]["id"],
-                              ),
-                              StreamBuilder(
-                                stream: streams[index],
-                                builder: (BuildContext context,
-                                    AsyncSnapshot<QuerySnapshot> snapshot) {
-                                  if (snapshot.hasError) {
-                                    return Center(
-                                      child: Text(
-                                        "!!!",
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          color: Colors.grey[700],
-                                        ),
-                                      ),
-                                    );
-                                  }
-
-                                  if (snapshot.connectionState ==
-                                      ConnectionState.waiting) {
-                                    return SizedBox(
-                                      height: 15,
-                                      width: 15,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: Colors.black,
-                                      ),
-                                    );
-                                  }
-
-                                  if (snapshot.data!.docs.isEmpty) {
-                                    return Center(
-                                      child: Text(
-                                        "no source",
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          color: Colors.grey[700],
-                                        ),
-                                      ),
-                                    );
-                                  }
-
-                                  return Switch(
-                                    value: snapshot.data!.docs[0]['status'],
-                                    onChanged: snapshot.data!.docs[0]['motion']
-                                        ? null
-                                        : (bool value) {
-                                            FirebaseFirestore.instance
-                                                .collection("lock")
-                                                .doc(snapshot.data!.docs[0].id)
-                                                .set(
-                                              //setting target state to !actualState
-                                              {
-                                                "targetState": !snapshot
-                                                    .data!.docs[0]['state'],
-                                                "isTransient": true,
-                                              },
-                                              SetOptions(
-                                                merge: true,
-                                              ),
-                                            );
-                                          },
-                                  );
-                                },
-                              ),
+                              FlutterSwitch(
+                                  value: toggleStatus,
+                                  onToggle: (val) {
+                                    setState(() {
+                                      toggleStatus = val;
+                                    });
+                                  }),
+                              toggleStatus
+                                  ? Image(
+                                      image:
+                                          AssetImage('assets/images/lock.png'))
+                                  : Image(
+                                      image: AssetImage(
+                                          'assets/images/unlock.png')),
                             ],
                           ),
-                        );
-                      },
-                      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                          maxCrossAxisExtent: 200,
-                          crossAxisSpacing: 10,
-                          mainAxisSpacing: 10),
+                        ),
+                        Text("On"),
+                        SizedBox(
+                          height: 10,
+                        ),
+                      ],
+                    ) //BoxDecoration
                     ),
-
-              // Container(
-              //   height: 150,
-              //   width: 150,
-              //   child: InkWell(
-              //     onTap: () {
-              //       switch (_controller.status) {
-              //         case AnimationStatus.completed:
-              //           _controller.reverse();
-              //           break;
-              //         case AnimationStatus.dismissed:
-              //           _controller.forward();
-              //           break;
-              //         default:
-              //       }
-              //     },
-              //     child: Lottie.asset(
-              //       'assets/images/passwordlock.json',
-              //       controller: _controller,
-              //       onLoaded: (composition) {
-              //         // Configure the AnimationController with the duration of the
-              //         // Lottie file and start the animation.
-              //         _controller
-              //           ..duration = composition.duration
-              //           ..forward();
-              //       },
-              //     ),
-              //   ),
-              // ),
-              SizedBox(
-                height: 10,
-              ),
-              Container(
-                  width: 150,
-                  height: 150,
-                  //BoxDecoration Widget
-                  decoration: BoxDecoration(
-                    //DecorationImage
-                    border: Border.all(
-                      color: Color(0xFF666CDB),
-                      width: 1,
-                    ),
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      FlutterSwitch(
-                          value: toggleStatus,
-                          onToggle: (val) {
-                            setState(() {
-                              toggleStatus = val;
-                            });
-                          }),
-                      Text("On"),
-                    ],
-                  ) //BoxDecoration
-                  ),
-              //Container
-              SizedBox(
-                height: 20,
-              ),
-              // InkWell(
-              //   onTap: () {
-              //     switch (_controller.status) {
-              //       case AnimationStatus.completed:
-              //         _controller.reverse();
-              //         break;
-              //       case AnimationStatus.dismissed:
-              //         _controller.forward();
-              //         break;
-              //       default:
-              //     }
-              //   },
-              //   child: Container(
-              //     height: 150,
-              //     width: 150,
-              //     child: InkWell(
-              //       onTap: () {
-              //         _launchUrl();
-              //       },
-              //       child: Lottie.asset(
-              //         'assets/images/securitycamera.json',
-              //         controller: _controller,
-              //         onLoaded: (composition) {
-              //           // Configure the AnimationController with the duration of the
-              //           // Lottie file and start the animation.
-              //           _controller
-              //             ..duration = composition.duration
-              //             ..forward();
-              //         },
-              //       ),
-              //     ),
-              //   ),
-              // ),
-            ],
+                //Container
+                SizedBox(
+                  height: 20,
+                ),
+                // InkWell(
+                //   onTap: () {
+                //     switch (_controller.status) {
+                //       case AnimationStatus.completed:
+                //         _controller.reverse();
+                //         break;
+                //       case AnimationStatus.dismissed:
+                //         _controller.forward();
+                //         break;
+                //       default:
+                //     }
+                //   },
+                //   child: Container(
+                //     height: 150,
+                //     width: 150,
+                //     child: InkWell(
+                //       onTap: () {
+                //         _launchUrl();
+                //       },
+                //       child: Lottie.asset(
+                //         'assets/images/securitycamera.json',
+                //         controller: _controller,
+                //         onLoaded: (composition) {
+                //           // Configure the AnimationController with the duration of the
+                //           // Lottie file and start the animation.
+                //           _controller
+                //             ..duration = composition.duration
+                //             ..forward();
+                //         },
+                //       ),
+                //     ),
+                //   ),
+                // ),
+              ],
+            ),
           ),
         ),
       ),

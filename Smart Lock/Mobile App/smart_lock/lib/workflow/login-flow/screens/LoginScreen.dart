@@ -5,7 +5,6 @@ import 'package:rounded_loading_button/rounded_loading_button.dart';
 
 import '../../home-flow/screens/homeScreen.dart';
 import '../services/GoogleAuth.dart';
-import 'PhoneVerificationScreen.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -197,59 +196,59 @@ class _LoginScreenState extends State<LoginScreen> {
                 SizedBox(
                   height: 20,
                 ),
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(35),
-                    border: Border.all(
-                      color: borderVisible
-                          ? Color(0xFF666CDB)
-                          : Colors.transparent,
-                      width: 1,
-                    ),
-                  ),
-                  child: RoundedLoadingButton(
-                    animateOnTap: false,
-                    color: Colors.white,
-                    duration: Duration(
-                      seconds: 1,
-                    ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => PhoneScreen()),
-                      );
-                    },
-                    controller: _btnController,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Image.asset(
-                          "assets/images/telephone_icon.png",
-                          height: 25,
-                        ),
-                        SizedBox(
-                          width: 15,
-                        ),
-                        // isLoading1
-                        //     ? SizedBox(
-                        //         height: 15,
-                        //         width: 15,
-                        //         child: CircularProgressIndicator(
-                        //           strokeWidth: 3,
-                        //         ),
-                        //       )
-                        //     : Text(
-                        Text(
-                          "Continue with Phone",
-                          style: TextStyle(
-                            fontFamily: "Poppins",
-                            color: Colors.black,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                // Container(
+                //   decoration: BoxDecoration(
+                //     borderRadius: BorderRadius.circular(35),
+                //     border: Border.all(
+                //       color: borderVisible
+                //           ? Color(0xFF666CDB)
+                //           : Colors.transparent,
+                //       width: 1,
+                //     ),
+                //   ),
+                //   child: RoundedLoadingButton(
+                //     animateOnTap: false,
+                //     color: Colors.white,
+                //     duration: Duration(
+                //       seconds: 1,
+                //     ),
+                //     onPressed: () {
+                //       Navigator.push(
+                //         context,
+                //         MaterialPageRoute(builder: (context) => PhoneScreen()),
+                //       );
+                //     },
+                //     controller: _btnController,
+                //     child: Row(
+                //       mainAxisAlignment: MainAxisAlignment.center,
+                //       children: [
+                //         Image.asset(
+                //           "assets/images/telephone_icon.png",
+                //           height: 25,
+                //         ),
+                //         SizedBox(
+                //           width: 15,
+                //         ),
+                //         // isLoading1
+                //         //     ? SizedBox(
+                //         //         height: 15,
+                //         //         width: 15,
+                //         //         child: CircularProgressIndicator(
+                //         //           strokeWidth: 3,
+                //         //         ),
+                //         //       )
+                //         //     : Text(
+                //         Text(
+                //           "Continue with Phone",
+                //           style: TextStyle(
+                //             fontFamily: "Poppins",
+                //             color: Colors.black,
+                //           ),
+                //         ),
+                //       ],
+                //     ),
+                //   ),
+                // ),
               ],
             ),
           ),
