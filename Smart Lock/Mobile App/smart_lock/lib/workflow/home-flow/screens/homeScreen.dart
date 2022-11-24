@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:lottie/lottie.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -15,13 +16,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   bool quickViewItems = true;
   bool isLoading = true;
   List<Stream<QuerySnapshot>> streams = [];
+  var node1 = '0x01';
   List docs = [];
-  // late final AnimationController _controller;
+  late final AnimationController _controller;
   final Uri _url = Uri.parse('http://proxy60.rt3.io:37278/');
-  bool toggleStatus = false;
+  late bool toggleStatus;
   bool internetConnectivity = false;
   late var nodeStatus;
   late var nodeID;
+  late var k;
   var dio = Dio();
   final firestoreInstance = FirebaseFirestore.instance;
 
@@ -33,10 +36,23 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   void getHttp() async {
     try {
-      var response = await Dio().get('http://localhost:3000/lock/getNodeID/');
-      print(response.data['values'][0]['nodeId']); // access the json data
-      print(response.data.toString()); // Prints the Data
-      if (response.statusCode == 200) {}
+      var response =
+          await Dio().get('http://172.20.10.6:3000/lock/getByNode/0x01');
+      // k = response.data['values'][0]['nodeId'];
+      // print(response.data['values'][0]['nodeId']); // access the json data
+      // print(response.data.toString()); // Prints the Data
+      // print(k);
+
+      if (response.statusCode == 200) {
+        setState(() {
+          if (response.data['values'][0]['status'] == "true") {
+            toggleStatus = true;
+          } else {
+            toggleStatus = false;
+          }
+          isLoading = true;
+        });
+      }
     } catch (e) {
       print(e);
     }
@@ -44,24 +60,23 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   void sendResponse(status, deviceID) async {
     Response response = await dio.post(
-        'http://13.235.99.169:3000/lock/postLockStatus',
-        data: {"nodeId": "poiopu", "status": "pdsgd", "motion": "gfdg"});
+        'http://172.20.10.6:3000/lock/updateLockStatus',
+        data: {"nodeId": deviceID, "status": status});
     print(response.data['status']);
   }
 
   void _onPressed() {
-    firestoreInstance.collection("lock").snapshots().listen((result) {
+    firestoreInstance.collection("lockRealTime").snapshots().listen((result) {
       result.docChanges.forEach((res) {
-        if (res.type == DocumentChangeType.added) {
-          print("added");
-          print(res.doc.data());
-        } else if (res.type == DocumentChangeType.modified) {
+        if (res.type == DocumentChangeType.modified) {
           print("modified");
-          print(res.doc.data());
+          // print(res.doc.data());
+          // print(res.doc['isChanged']);
+          setState(() {
+            node1 = res.doc['isChanged'];
+            toggleStatus = res.doc['isChanged'];
+          });
           // getHttp();
-        } else if (res.type == DocumentChangeType.removed) {
-          print("removed");
-          print(res.doc.data());
         }
       });
     });
@@ -70,7 +85,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    _controller = AnimationController(vsync: this);
     _onPressed();
+    // getHttp();
+    setState(() {
+      isLoading = false;
+    });
+    toggleStatus = true;
   }
 
   @override
@@ -114,34 +135,34 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Container(
-                //   height: 150,
-                //   width: 150,
-                //   child: InkWell(
-                //     onTap: () {
-                //       switch (_controller.status) {
-                //         case AnimationStatus.completed:
-                //           _controller.reverse();
-                //           break;
-                //         case AnimationStatus.dismissed:
-                //           _controller.forward();
-                //           break;
-                //         default:
-                //       }
-                //     },
-                //     child: Lottie.asset(
-                //       'assets/images/passwordlock.json',
-                //       controller: _controller,
-                //       onLoaded: (composition) {
-                //         // Configure the AnimationController with the duration of the
-                //         // Lottie file and start the animation.
-                //         _controller
-                //           ..duration = composition.duration
-                //           ..forward();
-                //       },
-                //     ),
-                //   ),
-                // ),
+                Container(
+                  height: 150,
+                  width: 150,
+                  child: InkWell(
+                    onTap: () {
+                      switch (_controller.status) {
+                        case AnimationStatus.completed:
+                          _controller.reverse();
+                          break;
+                        case AnimationStatus.dismissed:
+                          _controller.forward();
+                          break;
+                        default:
+                      }
+                    },
+                    child: Lottie.asset(
+                      'assets/images/passwordlock.json',
+                      controller: _controller,
+                      onLoaded: (composition) {
+                        // Configure the AnimationController with the duration of the
+                        // Lottie file and start the animation.
+                        _controller
+                          ..duration = composition.duration
+                          ..forward();
+                      },
+                    ),
+                  ),
+                ),
                 SizedBox(
                   height: 10,
                 ),
@@ -172,6 +193,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               FlutterSwitch(
                                   value: toggleStatus,
                                   onToggle: (val) {
+                                    sendResponse(val, node1);
                                     setState(() {
                                       toggleStatus = val;
                                     });
@@ -186,7 +208,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             ],
                           ),
                         ),
-                        Text("On"),
+                        isLoading ? Text("dfg") : CircularProgressIndicator(),
                         SizedBox(
                           height: 10,
                         ),

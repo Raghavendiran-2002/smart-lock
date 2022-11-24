@@ -1,6 +1,14 @@
 const express = require("express");
 const mqtt = require("mqtt");
 const router = express.Router();
+const { getFirestore } = require("firebase-admin/firestore");
+var admin = require("firebase-admin");
+
+var serviceAccount = require("./smartlock.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
 
 const lockstatus = require("../models/lockstatus");
 
@@ -23,7 +31,9 @@ client.on("connect", () => {
 
 client.on("message", (topic, payload) => {
   console.log("Received Message:", topic, payload.toString());
+
   msg = JSON.parse(payload.toString());
+  syncFirestore(msg["status"], msg["nodeId"]);
   if (msg["nodeId"] == "0x01") {
     if (msg["status"] == true) {
       console.log("Lock is Open");
@@ -55,6 +65,14 @@ client.on("message", (topic, payload) => {
   }
 });
 
+async function syncFirestore(state, nodeID) {
+  db = getFirestore();
+  const cityRef = db.collection("lockRealTime").doc("0AlIjID2eJovhzl3SDRl");
+
+  // Set the 'capital' field of the city
+  const res = await cityRef.update({ isChanged: state, nodeID: nodeID });
+}
+
 router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
 
@@ -63,7 +81,6 @@ router.post("/createLockStatus", (req, res) => {
     .create({
       nodeId: req.body.nodeId,
       status: req.body.status,
-      motion: req.body.motion,
     })
     .then((status) => {
       console.log(`lock status... ID : ${req.body.nodeId}`);
