@@ -1,7 +1,7 @@
 const express = require("express");
 const mqtt = require("mqtt");
 const router = express.Router();
-const { getFirestore } = require("firebase-admin/firestore");
+// const { getFirestore } = require("firebase-admin/firestore");
 var admin = require("firebase-admin");
 
 var serviceAccount = require("./smartlock.json");
@@ -66,11 +66,9 @@ client.on("message", (topic, payload) => {
 });
 
 async function syncFirestore(state, nodeID) {
-  db = getFirestore();
-  const cityRef = db.collection("lockRealTime").doc("0AlIjID2eJovhzl3SDRl");
-
-  // Set the 'capital' field of the city
-  const res = await cityRef.update({ isChanged: state, nodeID: nodeID });
+  db = admin.firestore();
+  const smartlockdb = db.collection("lockRealTime").doc("0AlIjID2eJovhzl3SDRl");
+  await smartlockdb.update({ isChanged: state, nodeID: nodeID });
 }
 
 router.use(express.json());
@@ -105,13 +103,12 @@ router.post("/updateLockStatus", (req, res) => {
     .then((status) => {
       console.log(`lock status... ID updated: ${req.body.nodeId}`);
       client.publish(
-        "rpi",
+        "/lock/publishStatus",
         `{
         "nodeId": ${req.body.nodeId},
         "status": ${req.body.status},
       }`
       );
-      client.publish("rpi", "{'image':0}");
 
       return res.status(201).json({
         success: true,
