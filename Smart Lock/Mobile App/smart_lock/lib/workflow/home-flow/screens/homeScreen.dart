@@ -12,11 +12,11 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
-  Map<String, bool> stringBoolMapping = {"true": true, "false": false};
   bool isLoading = true;
   late final AnimationController _controller;
   List nodeID = [];
-  List<bool> nodeStatus = [];
+  var IP = "http://13.235.99.169:3000";
+  List<bool> nodeStatus = [false, false, false, false];
   final Uri _url = Uri.parse('http://proxy60.rt3.io:37278/');
   var dio = Dio();
   final firestoreInstance = FirebaseFirestore.instance;
@@ -28,12 +28,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void getLockStatus() async {
-    var response =
-        await Dio().get('http://13.235.99.169:3000/lock/getAllNodeID');
+    var response = await Dio().get('${IP}/lock/getAllNodeID');
     nodeID = response.data;
     for (Map map in nodeID) {
-      print(map['status']);
-      nodeStatus.add(stringBoolMapping[map['status']]!);
+      if (map['nodeId'] == '0x01') {
+        nodeStatus[0] = map['status'] == 'true' ? true : false;
+      } else if (map['nodeId'] == '0x02') {
+        nodeStatus[1] = map['status'] == 'true' ? true : false;
+      }
     }
     setState(() {
       isLoading = false;
@@ -41,23 +43,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void sendResponse(status, deviceID) async {
-    await dio.post('http://13.235.99.169:3000/lock/updateLockStatus',
+    await dio.post('${IP}/lock/updateLockStatus',
         data: {"nodeId": deviceID, "status": status});
   }
 
   void _lockRealTimeChanges() {
-    int i = 0;
     firestoreInstance.collection("lockRealTime").snapshots().listen((result) {
       result.docChanges.forEach((res) {
         if (res.type == DocumentChangeType.modified) {
           setState(() {
-            nodeStatus[i] = res.doc['isUpdate'];
-            print(res.doc['isUpdate']);
-            // nodeStatus[i] = res.doc['isChanged'];
+            getLockStatus();
           });
-          print(i);
         }
-        i++;
       });
     });
   }
@@ -107,35 +104,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       body: Padding(
         padding: EdgeInsets.symmetric(vertical: 10, horizontal: 5),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          // mainAxisAlignment: MainAxisAlignment.spaceAround,
+          // crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Container(
-            //   height: 150,
-            //   width: 150,
-            //   child: InkWell(
-            //     onTap: () {
-            //       switch (_controller.status) {
-            //         case AnimationStatus.completed:
-            //           _controller.reverse();
-            //           break;
-            //         case AnimationStatus.dismissed:
-            //           _controller.forward();
-            //           break;
-            //         default:
-            //       }
-            //     },
-            //     // child: Lottie.network(
-            //     //   "https://assets10.lottiefiles.com/packages/lf20_rf7upa0j.json",
-            //     //   controller: _controller,
-            //     //   onLoaded: (composition) {
-            //     //     _controller
-            //     //       ..duration = composition.duration
-            //     //       ..forward();
-            //     //   },
-            //     // ),
-            //   ),
-            // ),
             SizedBox(
               height: 10,
             ),
@@ -151,7 +122,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         crossAxisCount: 2,
                         crossAxisSpacing: 4.0,
                         mainAxisSpacing: 4.0,
-                        childAspectRatio: 0.8,
+                        childAspectRatio: 0.6,
                       ),
                       itemBuilder: (BuildContext context, int index) {
                         return Container(
@@ -194,7 +165,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 SizedBox(
                                   height: 10,
                                 ),
-                                Text("Smart Lock 1"),
                                 SizedBox(
                                   height: 10,
                                 ),
@@ -204,6 +174,20 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       },
                     ),
                   ),
+            FloatingActionButton(
+              onPressed: () {
+                _launchUrl();
+              },
+              child: Icon(Icons.video_camera_back_rounded),
+              // child: Lottie.network(
+              //   "https://assets8.lottiefiles.com/packages/lf20_cemuvgf7.json",
+              //   controller: _controller,
+              //   onLoaded: (composition) {
+              //     _controller
+              //       ..duration = composition.duration
+              //       ..forward();
+              //   },
+            ),
           ],
         ),
       ),

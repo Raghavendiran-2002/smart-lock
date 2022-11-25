@@ -34,8 +34,8 @@ client.on("message", (topic, payload) => {
   console.log("Received Message:", topic, payload.toString());
 
   msg = JSON.parse(payload.toString());
-  syncFirestore(msg["status"], msg["nodeId"], !isUpdate);
-  isUpdate = !isUpdate;
+  syncFirestore(msg["status"], msg["nodeId"]);
+  // isUpdate = !isUpdate;
   lockstatus
     .find({ nodeId: msg["nodeId"] })
     .updateOne({
@@ -66,9 +66,9 @@ async function syncFirestore(state, nodeID, isUpdate) {
   db = getFirestore();
   const smartlockdb = db.collection("lockRealTime").doc("0AlIjID2eJovhzl3SDRl");
   await smartlockdb.update({
-    isChanged: state,
+    isUpdate: state,
     nodeID: nodeID,
-    isUpdate: isUpdate,
+    // isUpdate: isUpdate,
   });
 }
 
