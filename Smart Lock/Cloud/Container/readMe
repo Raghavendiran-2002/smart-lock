@@ -1,0 +1,3 @@
+ docker build  --platform linux/amd64 -t smart-lock .
+ docker tag smart-lock raghavendiran2002/smart-lock 
+ docker push raghavendiran2002/smart-lock 

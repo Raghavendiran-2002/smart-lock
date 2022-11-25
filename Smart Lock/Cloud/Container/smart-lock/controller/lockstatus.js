@@ -14,6 +14,7 @@ const lockstatus = require("../models/lockstatus");
 
 const host = "13.235.99.169";
 const port = "1883";
+var isUpdate = true;
 const clientId = `mqtt_${Math.random().toString(16).slice(3)}`;
 
 const connectUrl = `mqtt://${host}:${port}`;
@@ -33,42 +34,42 @@ client.on("message", (topic, payload) => {
   console.log("Received Message:", topic, payload.toString());
 
   msg = JSON.parse(payload.toString());
-  syncFirestore(msg["status"], msg["nodeId"]);
-  if (msg["nodeId"] == "0x01") {
-    if (msg["status"] == true) {
-      console.log("Lock is Open");
-      lockstatus
-        .find({ nodeId: "0x01" })
-        .updateOne({
-          nodeId: "0x01",
-          status: msg["status"],
-        })
-        .then((status) => {
-          console.log(`lock status... ID updated: `);
-          return console.log({
-            success: true,
-            message: "Data Updated Successfully",
-            quality: status,
-          });
-        })
-        .catch((err) => {
-          console.log({ success: false, message: err.message });
-          return;
-        });
-      if (msg["motion"] == true) {
-        client.publish("rpi", "{'image':0}");
-        console.log("Published");
-      }
-    } else if (msg["status"] == false) {
-      console.log("Lock is Close");
-    }
+  syncFirestore(msg["status"], msg["nodeId"], !isUpdate);
+  isUpdate = !isUpdate;
+  lockstatus
+    .find({ nodeId: msg["nodeId"] })
+    .updateOne({
+      nodeId: msg["nodeId"],
+      status: msg["status"],
+    })
+    .then((status) => {
+      console.log(`lock status... ID updated: `);
+      return console.log({
+        success: true,
+        message: "Data Updated Successfully",
+        quality: status,
+      });
+    })
+    .catch((err) => {
+      console.log({ success: false, message: err.message });
+      return;
+    });
+
+  if (msg["status"] == true) {
+    console.log(`Lock ${msg["nodeId"]} is Open`);
+  } else if (msg["status"] == false) {
+    console.log(`Lock ${msg["nodeId"]}  is Close`);
   }
 });
 
-async function syncFirestore(state, nodeID) {
+async function syncFirestore(state, nodeID, isUpdate) {
   db = getFirestore();
   const smartlockdb = db.collection("lockRealTime").doc("0AlIjID2eJovhzl3SDRl");
-  await smartlockdb.update({ isChanged: state, nodeID: nodeID });
+  await smartlockdb.update({
+    isChanged: state,
+    nodeID: nodeID,
+    isUpdate: isUpdate,
+  });
 }
 
 router.use(express.json());
@@ -81,7 +82,7 @@ router.post("/createLockStatus", (req, res) => {
       status: req.body.status,
     })
     .then((status) => {
-      console.log(`lock status... ID : ${req.body.nodeId}`);
+      console.log(`lock status... ID : ${req.body}`);
       return res.status(201).json({
         success: true,
         message: "Data Added Successfully",
@@ -101,7 +102,9 @@ router.post("/updateLockStatus", (req, res) => {
       status: req.body.status,
     })
     .then((status) => {
-      console.log(`lock status... ID updated: ${req.body.nodeId}`);
+      console.log(
+        `lock status... ID updated: { nodeID : ${req.body.nodeId}, status : ${req.body.status}`
+      );
       client.publish(
         "/lock/publishStatus",
         `{
@@ -131,6 +134,21 @@ router.get("/getNodeID", (req, res) => {
     .catch((err) => {
       console.log(`no such lock ID found : ${req.body.nodeId}`);
       return res.status(500).json({ success: false, message: err.message });
+    });
+});
+
+router.get("/getAllNodeID", (req, res) => {
+  lockstatus
+    .find({}, {})
+    .then((data) => {
+      console.log("Retrived All Documents");
+      res.send(data);
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message:
+          err.message || "Some error occurred while retrieving tutorials.",
+      });
     });
 });
 
