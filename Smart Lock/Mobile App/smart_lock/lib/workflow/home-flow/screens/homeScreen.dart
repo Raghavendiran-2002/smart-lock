@@ -17,7 +17,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   List nodeID = [];
   var IP = "http://13.235.99.169:3000";
   List<bool> nodeStatus = [false, false, false, false];
-  final Uri _url = Uri.parse('http://proxy60.rt3.io:37278/');
+  // final Uri _url = Uri.parse('http://proxy60.rt3.io:37278/');
+  final Uri _url = Uri.parse('http://192.168.1.8:8000/index.html');
   var dio = Dio();
   final firestoreInstance = FirebaseFirestore.instance;
 
