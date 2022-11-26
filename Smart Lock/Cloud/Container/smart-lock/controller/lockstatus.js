@@ -39,7 +39,7 @@ client.on("message", (topic, payload) => {
   lockstatus
     .find({ nodeId: msg["nodeId"] })
     .updateOne({
-      nodeId: msg["nodeId"],
+      nodeId: `${msg["nodeId"]}`,
       status: msg["status"],
     })
     .then((status) => {
@@ -105,13 +105,12 @@ router.post("/updateLockStatus", (req, res) => {
       console.log(
         `lock status... ID updated: { nodeID : ${req.body.nodeId}, status : ${req.body.status}`
       );
-      client.publish(
-        "/lock/publishStatus",
-        `{
-        "nodeId": ${req.body.nodeId},
-        "status": ${req.body.status},
-      }`
-      );
+      msg = JSON.parse({
+        nodeId: req.body.nodeId,
+        status: req.body.status,
+      });
+      console.log(msg);
+      client.publish("/lock/publishStatus", msg);
 
       return res.status(201).json({
         success: true,

@@ -18,7 +18,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   var IP = "http://13.235.99.169:3000";
   List<bool> nodeStatus = [false, false, false, false];
   // final Uri _url = Uri.parse('http://proxy60.rt3.io:37278/');
-  final Uri _url = Uri.parse('http://192.168.1.8:8000/index.html');
+  final Uri _url = Uri.parse('http://172.20.10.4:5001/video_feed');
   var dio = Dio();
   final firestoreInstance = FirebaseFirestore.instance;
 
@@ -46,6 +46,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void sendResponse(status, deviceID) async {
     await dio.post('${IP}/lock/updateLockStatus',
         data: {"nodeId": deviceID, "status": status});
+    LoadBundleTask bundle = FirebaseFirestore.instance.loadBundle(bundle);
   }
 
   void _lockRealTimeChanges() {
