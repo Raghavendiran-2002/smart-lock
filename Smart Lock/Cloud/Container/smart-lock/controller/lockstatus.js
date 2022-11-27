@@ -12,7 +12,7 @@ admin.initializeApp({
 
 const lockstatus = require("../models/lockstatus");
 
-const host = "13.235.99.169";
+const host = "0.0.0.0";
 const port = "1883";
 var isUpdate = true;
 const clientId = `mqtt_${Math.random().toString(16).slice(3)}`;
@@ -102,14 +102,12 @@ router.post("/updateLockStatus", (req, res) => {
       status: req.body.status,
     })
     .then((status) => {
-      console.log(
-        `lock status... ID updated: { nodeID : ${req.body.nodeId}, status : ${req.body.status}`
-      );
-      msg = JSON.parse({
+      console.log(`Updated Lock status: ${req.body.status}`);
+      msg = JSON.stringify({
         nodeId: req.body.nodeId,
         status: req.body.status,
       });
-      console.log(msg);
+
       client.publish("/lock/publishStatus", msg);
 
       return res.status(201).json({
@@ -126,6 +124,19 @@ router.post("/updateLockStatus", (req, res) => {
 router.get("/getNodeID", (req, res) => {
   lockstatus
     .find({ nodeId: req.body.nodeId })
+    .then((qual) => {
+      console.log(`Found lock ID : ${req.body.nodeId}`);
+      return res.status(200).json({ success: true, quality: qual });
+    })
+    .catch((err) => {
+      console.log(`no such lock ID found : ${req.body.nodeId}`);
+      return res.status(500).json({ success: false, message: err.message });
+    });
+});
+
+router.get("/DeleteNodeID", (req, res) => {
+  lockstatus
+    .deleteOne({ nodeId: req.body.nodeId })
     .then((qual) => {
       console.log(`Found lock ID : ${req.body.nodeId}`);
       return res.status(200).json({ success: true, quality: qual });

@@ -1,0 +1,33 @@
+version: '3'
+services:
+  app:
+    container_name: smart-lock
+    restart: always
+    image: raghavendiran2002/smart-lock:latest
+    ports:
+      - '3000:3000'
+    external_links:
+      - mongo
+
+  mongo:
+    container_name: mongo
+    # command: 
+    #   - '--logpath'
+    #   - '/var/log/mongodb/mongod.log'
+    image: mongo
+    volumes:
+      - ./data:/data/db
+    ports:
+      - '27018:27017'
+      
+  mosquitto:
+    container_name: mqtt
+    image: eclipse-mosquitto:2
+    volumes:
+      - ./config/:/mosquitto/config/:rw
+      - data:/mosquitto/data/
+    ports:
+      - '1883:1883'
+
+volumes:
+  data: ~
