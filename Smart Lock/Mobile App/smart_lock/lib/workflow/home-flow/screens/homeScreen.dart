@@ -13,7 +13,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool isLoading = true;
-  bool isIDWrong = false;
   List nodeID = [];
   var IP = "http://13.235.244.236:3000";
   List<bool> nodeStatus = [false, false, false, false];
@@ -60,16 +59,33 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  void listenToRealtimeUpdates_listenForUpdates() {
+  void _wrongIDNotify() {
     firestoreInstance.collection("wrongID").snapshots().listen((result) {
       result.docChanges.forEach((res) {
         if (res.type == DocumentChangeType.modified) {
           setState(() {
-            isIDWrong = true;
+            displaySnackBar("Invalid ID!  😓");
+            // ScaffoldMessenger.of(context).showSnackBar(snackBar);
           });
         }
       });
     });
+  }
+
+  void displaySnackBar(String message, {Color color = Colors.red}) {
+    SnackBar snackBar = SnackBar(
+      content: Text(
+        message,
+      ),
+      backgroundColor: color,
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      duration: Duration(seconds: 4),
+      padding: EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   @override
@@ -77,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     getLockStatus();
     _lockRealTimeChanges();
-    listenToRealtimeUpdates_listenForUpdates();
+    _wrongIDNotify();
   }
 
   @override
@@ -184,35 +200,16 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                     ),
                   ),
-            isIDWrong
-                ? AlertDialog(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(32.0))),
-                    contentPadding: EdgeInsets.only(top: 5.0, bottom: 5),
-                    content: Container(
-                      width: 50.0,
-                      height: 40.0,
-                      child: Center(
-                        child: Text(
-                          'Wrong ID',
-                        ),
-                      ),
-                    ),
-                    actions: <Widget>[
-                      Center(
-                        child: TextButton(
-                          onPressed: () => Navigator.pushNamed(context, 'home'),
-                          child: const Text('Cancel'),
-                        ),
-                      ),
-                    ],
-                  )
-                : Text(""),
-            FloatingActionButton(
-              onPressed: () {
-                _launchUrl();
-              },
-              child: Icon(Icons.video_camera_back_rounded),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 80, horizontal: 20),
+                child: InkWell(
+                  onTap: () {
+                    _launchUrl();
+                  },
+                  child: Icon(Icons.video_camera_back_rounded),
+                ),
+              ),
             ),
           ],
         ),
