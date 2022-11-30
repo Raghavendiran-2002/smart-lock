@@ -10,11 +10,11 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);
 int variable = 0;
 
 // WiFi
-const char *ssid = "faster"; // Enter your WiFi name
-const char *password = "kenwayyy";  // Enter WiFi password
+const char *ssid = "JioFi3_930842"; // Enter your WiFi name
+const char *password = "u591smmuaa";  // Enter WiFi password
 
 // MQTT Broker
-const char *mqtt_broker = "13.235.99.169";
+const char *mqtt_broker = "13.233.193.140";
 const char *topic = "/lock/status";
 //const char *mqtt_username = "emqx";
 //const char *mqtt_password = "public";
@@ -66,6 +66,14 @@ void PublishMessage(bool state){
   DynamicJsonDocument doc(1024);
   doc["status"] = state;
   doc["nodeId"] = "0x01";
+  char message[100];
+  serializeJson(doc, message);
+  client.publish(topic, message);
+}
+
+void WrongID(){
+  DynamicJsonDocument doc(1024);
+  doc["wrong"] = true;
   char message[100];
   serializeJson(doc, message);
   client.publish(topic, message);
@@ -134,6 +142,7 @@ void loop() {
 else  {
     Serial.println(" Access Denied ");
 //    delay(3000);
+    WrongID();
 //    PublishMessage(false);
 //    digitalWrite(2, LOW);
   }

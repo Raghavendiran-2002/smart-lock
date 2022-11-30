@@ -11,11 +11,11 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen> {
   bool isLoading = true;
-  late final AnimationController _controller;
+  bool isIDWrong = false;
   List nodeID = [];
-  var IP = "http://13.235.99.169:3000";
+  var IP = "http://13.235.244.236:3000";
   List<bool> nodeStatus = [false, false, false, false];
   // final Uri _url = Uri.parse('http://proxy60.rt3.io:37278/');
   final Uri _url = Uri.parse('http://172.20.10.4:5001/video_feed');
@@ -46,7 +46,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void sendResponse(status, deviceID) async {
     await dio.post('${IP}/lock/updateLockStatus',
         data: {"nodeId": deviceID, "status": status});
-    LoadBundleTask bundle = FirebaseFirestore.instance.loadBundle(bundle);
   }
 
   void _lockRealTimeChanges() {
@@ -61,13 +60,24 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     });
   }
 
+  void listenToRealtimeUpdates_listenForUpdates() {
+    firestoreInstance.collection("wrongID").snapshots().listen((result) {
+      result.docChanges.forEach((res) {
+        if (res.type == DocumentChangeType.modified) {
+          setState(() {
+            isIDWrong = true;
+          });
+        }
+      });
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     getLockStatus();
-    _controller =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 1));
     _lockRealTimeChanges();
+    listenToRealtimeUpdates_listenForUpdates();
   }
 
   @override
@@ -106,8 +116,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       body: Padding(
         padding: EdgeInsets.symmetric(vertical: 10, horizontal: 5),
         child: Column(
-          // mainAxisAlignment: MainAxisAlignment.spaceAround,
-          // crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
               height: 10,
@@ -143,11 +151,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   height: 10,
                                 ),
                                 nodeStatus[index]
-                                    ? Image.asset('assets/images/lock.png',
+                                    ? Image.asset('assets/images/unlock.png',
                                         width: 150,
                                         height: 120,
                                         fit: BoxFit.fill)
-                                    : Image.asset('assets/images/unlock.png',
+                                    : Image.asset('assets/images/lock.png',
                                         width: 150,
                                         height: 120,
                                         fit: BoxFit.fill),
@@ -176,19 +184,35 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       },
                     ),
                   ),
+            isIDWrong
+                ? AlertDialog(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(32.0))),
+                    contentPadding: EdgeInsets.only(top: 5.0, bottom: 5),
+                    content: Container(
+                      width: 50.0,
+                      height: 40.0,
+                      child: Center(
+                        child: Text(
+                          'Wrong ID',
+                        ),
+                      ),
+                    ),
+                    actions: <Widget>[
+                      Center(
+                        child: TextButton(
+                          onPressed: () => Navigator.pushNamed(context, 'home'),
+                          child: const Text('Cancel'),
+                        ),
+                      ),
+                    ],
+                  )
+                : Text(""),
             FloatingActionButton(
               onPressed: () {
                 _launchUrl();
               },
               child: Icon(Icons.video_camera_back_rounded),
-              // child: Lottie.network(
-              //   "https://assets8.lottiefiles.com/packages/lf20_cemuvgf7.json",
-              //   controller: _controller,
-              //   onLoaded: (composition) {
-              //     _controller
-              //       ..duration = composition.duration
-              //       ..forward();
-              //   },
             ),
           ],
         ),

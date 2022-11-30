@@ -31,29 +31,28 @@ client.on("connect", () => {
 });
 
 client.on("message", (topic, payload) => {
-  console.log("Received Message:", topic, payload.toString());
-
   msg = JSON.parse(payload.toString());
-  syncFirestore(msg["status"], msg["nodeId"]);
-  lockstatus
-    .find({ nodeId: msg["nodeId"] })
-    .updateOne({
-      nodeId: `${msg["nodeId"]}`,
-      status: msg["status"],
-    })
-    .then((status) => {
-      console.log(`lock status... ID updated: `);
-      return console.log({
-        success: true,
-        message: "Data Updated Successfully",
-        quality: status,
+  if (msg.hasOwnProperty("status")) {
+    syncFirestore(msg["status"], msg["nodeId"], msg["nodeId"]);
+    lockstatus
+      .find({ nodeId: msg["nodeId"] })
+      .updateOne({
+        nodeId: `${msg["nodeId"]}`,
+        status: msg["status"],
+      })
+      .then((status) => {
+        return;
+      })
+      .catch((err) => {
+        console.log({ success: false, message: err.message });
+        return;
       });
-    })
-    .catch((err) => {
-      console.log({ success: false, message: err.message });
-      return;
-    });
-
+  }
+  if (msg.hasOwnProperty("wrong")) {
+    if (msg["wrong"] == true) {
+      WrongID();
+    }
+  }
   if (msg["status"] == true) {
     console.log(`Lock ${msg["nodeId"]} is Open`);
   } else if (msg["status"] == false) {
@@ -65,9 +64,18 @@ async function syncFirestore(state, nodeID, isUpdate) {
   db = getFirestore();
   const smartlockdb = db.collection("lockRealTime").doc("0AlIjID2eJovhzl3SDRl");
   await smartlockdb.update({
-    isUpdate: state,
+    isChanged: state,
     nodeID: nodeID,
-    // isUpdate: isUpdate,
+    isUpdate: !isUpdate,
+    isRandom: Math.random(),
+  });
+}
+
+async function WrongID() {
+  db = getFirestore();
+  const smartlockdb = db.collection("wrongID").doc("6tsfk3UyPScZ6DX7Qhdg");
+  await smartlockdb.update({
+    wrong: Math.random(),
   });
 }
 
