@@ -24,9 +24,9 @@ PubSubClient client(espClient);
 
 void setup() {
    Serial.begin(115200);
-   pinMode(2, OUTPUT);
+   pinMode(4, OUTPUT);
 
-   digitalWrite(2, LOW);
+   digitalWrite(4, LOW);
    SPI.begin();      
    mfrc522.PCD_Init(); 
    WiFi.begin(ssid, password);
@@ -61,7 +61,7 @@ void WifiConnect(){
 void PublishMessage(bool state){
   DynamicJsonDocument doc(1024);
   doc["status"] = state;
-  doc["nodeId"] = "0x01";
+  doc["nodeId"] = "0x02";
   char message[100];
   serializeJson(doc, message);
   client.publish(topic, message);
@@ -87,14 +87,16 @@ void callback(char *topic, byte *payload, unsigned int length) {
  deserializeJson(doc, message);
  bool state = doc["status"]; 
  const int deviceUID = doc["nodeId"];
- Serial.println(state); 
- if (state == true){
-        Serial.println("Lock is OPEN");
-        digitalWrite(2, HIGH);
- }
- else {
-        digitalWrite(2, LOW);
-        Serial.println("Lock is CLOSED");
+ if(doc["nodeId"] == "0x02"){
+   Serial.println(state); 
+   if (state == true){
+          Serial.println("Lock is OPEN");
+          digitalWrite(4, HIGH);
+   }
+   else {
+          digitalWrite(4, LOW);
+          Serial.println("Lock is CLOSED");
+   }
  }
 }
 void loop() {

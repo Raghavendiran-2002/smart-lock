@@ -26,7 +26,7 @@ void setup() {
    Serial.begin(115200);
    pinMode(2, OUTPUT);
 
-   digitalWrite(2, LOW);
+   digitalWrite(2, HIGH);
    SPI.begin();      
    mfrc522.PCD_Init(); 
    WiFi.begin(ssid, password);
@@ -87,14 +87,16 @@ void callback(char *topic, byte *payload, unsigned int length) {
  deserializeJson(doc, message);
  bool state = doc["status"]; 
  const int deviceUID = doc["nodeId"];
- Serial.println(state); 
- if (state == true){
-        Serial.println("Lock is OPEN");
-        digitalWrite(2, HIGH);
- }
- else {
-        digitalWrite(2, LOW);
-        Serial.println("Lock is CLOSED");
+ if(doc["nodeId"] == "0x01"){
+   Serial.println(state); 
+   if (state == true){
+          Serial.println("Lock is OPEN");
+          digitalWrite(2, LOW);
+   }
+   else {
+          digitalWrite(2, HIGH);
+          Serial.println("Lock is CLOSED");
+   }
  }
 }
 void loop() {
@@ -125,7 +127,7 @@ void loop() {
     Serial.println(" Authorized Access ");
     Serial.println();
     PublishMessage(true);
-    digitalWrite(2, HIGH);
+    digitalWrite(2, LOW);
   }
   else  {
     Serial.println(" Access Denied ");
