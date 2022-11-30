@@ -12,7 +12,7 @@ admin.initializeApp({
 
 const lockstatus = require("../models/lockstatus");
 
-const host = "0.0.0.0";
+const host = "mosquitto";
 const port = "1883";
 var isUpdate = true;
 const clientId = `mqtt_${Math.random().toString(16).slice(3)}`;
@@ -26,7 +26,7 @@ const topic = "/lock/status";
 client.on("connect", () => {
   console.log("Connected");
   client.subscribe([topic], () => {
-    // console.log(`Subscribe to topic '${topic}'`);
+    console.log(`Subscribe to topic '${topic}'`);
   });
 });
 
@@ -35,7 +35,6 @@ client.on("message", (topic, payload) => {
 
   msg = JSON.parse(payload.toString());
   syncFirestore(msg["status"], msg["nodeId"]);
-  // isUpdate = !isUpdate;
   lockstatus
     .find({ nodeId: msg["nodeId"] })
     .updateOne({

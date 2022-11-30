@@ -4,17 +4,13 @@ services:
     container_name: smart-lock
     restart: always
     build: .
+    # image: raghavendiran2002/smart-lock:latest
     ports:
       - '3000:3000'
     external_links:
       - mongo
-  # app:
-  #   container_name: nodejs
-  #   image: raghavendiran2002/smart-lock:latest
-  #   ports:
-  #     - '3000:3000'
-    # external_links:
-    #   - mongo  
+      - mosquitto
+
   mongo:
     container_name: mongo
     command: 
@@ -25,3 +21,18 @@ services:
       - ./data:/data/db
     ports:
       - '27018:27017'
+      
+  mosquitto:
+    container_name: mqtt
+    image: eclipse-mosquitto:2
+    volumes:
+      - ./config/:/mosquitto/config/:rw
+      - data:/mosquitto/data/
+    ports:
+      - '1884:1883'
+
+volumes:
+  data: ~
+
+
+
