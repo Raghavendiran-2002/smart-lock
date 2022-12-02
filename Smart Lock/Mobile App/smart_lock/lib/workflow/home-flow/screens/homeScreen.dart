@@ -1,4 +1,3 @@
-import 'package:blurrycontainer/blurrycontainer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -107,6 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
     width = size.width;
     return SafeArea(
       child: Scaffold(
+        // backgroundColor: Color(0xFFD5E1F4),
         body: Container(
           padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
           child: Column(
@@ -123,20 +123,17 @@ class _HomeScreenState extends State<HomeScreen> {
                       fontSize: 30,
                     ),
                   ),
-                  BlurryContainer(
-                    blur: 1,
-                    height: height / 15,
-                    width: width / 3,
-                    elevation: 0,
-                    color: Colors.black,
-                    padding: EdgeInsets.all(8),
-                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Color(0xFF7D3B68),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
-                          "Logout",
+                          "   Logout",
                           style: TextStyle(
                               color: Colors.white, fontWeight: FontWeight.bold),
                         ),
