@@ -10,8 +10,8 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);
 int variable = 0;
 
 // WiFi
-const char *ssid = "JioFi3_930842"; // Enter your WiFi name
-const char *password = "u591smmuaa";  // Enter WiFi password
+const char *ssid = "BIRAC_API"; // Enter your WiFi name
+const char *password = "10267042";  // Enter WiFi password
 
 const char *mqtt_broker = "13.233.193.140";
 const char *topic = "/lock/status";

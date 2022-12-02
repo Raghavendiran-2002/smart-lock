@@ -51,6 +51,8 @@ dependencies:
   lottie: ^2.0.0
   http: ^0.13.5
   cloud_firestore: ^4.1.0
+  sizer: ^2.0.15
+  glass: ^1.0.1+1
 
 dev_dependencies:
   flutter_test:
