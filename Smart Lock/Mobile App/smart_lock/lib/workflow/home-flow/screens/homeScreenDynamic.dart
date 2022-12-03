@@ -7,16 +7,18 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeDynamic extends StatefulWidget {
+  const HomeDynamic({Key? key}) : super(key: key);
+
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<HomeDynamic> createState() => _HomeDynamicState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeDynamicState extends State<HomeDynamic> {
   bool isLoading = true;
   List nodeID = [];
-  var IP = "http://13.235.244.236:3000";
-  // var IP = "http://192.168.1.6:3000";
+  // var IP = "http://13.235.244.236:3000";
+  var IP = "http://192.168.1.6:3000";
   List<bool> nodeStatus = [false, false, false, false];
   // final Uri _url = Uri.parse('http://proxy60.rt3.io:37278/');
   final Uri _url = Uri.parse('http://172.20.10.4:5001/video_feed');
@@ -33,6 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void getLockStatus() async {
     var response = await Dio().get('${IP}/lock/getAllNodeID');
     nodeID = response.data;
+    print(nodeID);
     for (Map map in nodeID) {
       if (map['nodeId'] == '0x01') {
         nodeStatus[0] = map['status'] == 'true' ? true : false;
@@ -296,6 +299,25 @@ class _CustomDeviceWidgetState extends State<CustomDeviceWidget> {
         data: {"nodeId": deviceID, "status": status});
   }
 
+  Map<String, Icon> iconMapping = {
+    'lock': Icon(
+      CupertinoIcons.lock,
+      size: 50,
+    ),
+    'lamp': Icon(
+      CupertinoIcons.lightbulb,
+      size: 50,
+    ),
+    'fan': Icon(
+      CupertinoIcons.ant,
+      size: 50,
+    ),
+    'lamp': Icon(
+      CupertinoIcons.lightbulb,
+      size: 50,
+    ),
+  };
+
   @override
   Widget build(BuildContext context) {
     return Expanded(
@@ -306,7 +328,7 @@ class _CustomDeviceWidgetState extends State<CustomDeviceWidget> {
           crossAxisCount: 2,
           // mainAxisExtent: height / 7,
           crossAxisSpacing: 25.0,
-          mainAxisSpacing: 10.0,
+          mainAxisSpacing: 25.0,
           childAspectRatio: 1,
         ),
         itemBuilder: (BuildContext context, int index) {
@@ -337,12 +359,18 @@ class _CustomDeviceWidgetState extends State<CustomDeviceWidget> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       widget.nodeStatus[index] ? Text("ON") : Text("OFF"),
-                      Icon(
-                        CupertinoIcons.lock,
-                        size: 50,
+                      // deviceIcon(1),
+                      // iconMapping["lamp"]!,
+                      iconMapping[widget.nodeID[index]['deviceType']]!,
+                      Text(
+                        widget.nodeID[index]['deviceID'],
+                        style: TextStyle(
+                          color: Colors.grey[700],
+                          fontSize: 15,
+                        ),
                       ),
                       Text(
-                        widget.nodeID[index]['nodeId'],
+                        widget.nodeID[index]['deviceName'],
                         style: TextStyle(
                           color: Colors.grey[700],
                           fontSize: 15,
@@ -354,7 +382,7 @@ class _CustomDeviceWidgetState extends State<CustomDeviceWidget> {
                     activeColor: Colors.white54,
                     value: widget.nodeStatus[index],
                     onChanged: (val) {
-                      sendResponse(val, widget.nodeID[index]['nodeId']);
+                      sendResponse(val, widget.nodeID[index]['deviceID']);
                       setState(() {
                         widget.nodeStatus[index] = val;
                       });

@@ -1,9 +1,13 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const homeDeviceSchema = new Schema(
+const lockSchema = new Schema(
   {
-    deviceId: {
+    deviceID: {
+      type: String,
+      required: true,
+    },
+    acutalState: {
       type: String,
       required: true,
     },
@@ -11,16 +15,12 @@ const homeDeviceSchema = new Schema(
       type: String,
       required: true,
     },
-    actualState: {
+    deviceType: {
       type: String,
       required: true,
-    },
-    previousState: {
-      type: String,
-      // required: true,
     },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("lock", lockSchema);
+module.exports = mongoose.model("locks", lockSchema);

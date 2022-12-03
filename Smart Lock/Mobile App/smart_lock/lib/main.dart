@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_lock/workflow/home-flow/screens/homeScreen.dart';
+import 'package:smart_lock/workflow/home-flow/screens/homeScreenDynamic.dart';
 import 'package:smart_lock/workflow/login-flow/otp_screen.dart';
 import 'package:smart_lock/workflow/login-flow/screens/LoginScreen.dart';
 
@@ -28,11 +29,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Foodly',
-      initialRoute: "home",
+      initialRoute: "homedy",
       routes: {
         "/": (context) => LoginScreen(),
         "home": (context) => HomeScreen(),
+        "homedy": (context) => HomeDynamic(),
         "login": (context) =>
             OTPScreen(verificationID: _userUID!, phoneNumber: _phoneNumber!),
       },

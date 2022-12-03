@@ -53,6 +53,8 @@ dependencies:
   cloud_firestore: ^4.1.0
   sizer: ^2.0.15
   glass: ^1.0.1+1
+  font_awesome_flutter: ^10.2.1
+  modal_bottom_sheet: ^2.1.2
 
 dev_dependencies:
   flutter_test:

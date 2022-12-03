@@ -10,9 +10,9 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
-const lockstatus = require("../models/homeDeviceSchema");
+const lockstatus = require("../models/lockstatus");
 
-const host = "localhost";
+const host = "13.233.193.140";
 const port = "1883";
 var isUpdate = true;
 const clientId = `mqtt_${Math.random().toString(16).slice(3)}`;
@@ -33,13 +33,12 @@ client.on("connect", () => {
 client.on("message", (topic, payload) => {
   msg = JSON.parse(payload.toString());
   if (msg.hasOwnProperty("status")) {
-    syncFirestore(msg["status"], msg["deviceId"], msg["deviceName"]);
+    syncFirestore(msg["status"], msg["nodeId"], msg["nodeId"]);
     lockstatus
-      .find({ nodeId: msg["deviceId"] })
+      .find({ deviceID: msg["nodeId"] })
       .updateOne({
-        deviceId: `${msg["deviceId"]}`,
-        actualState: msg["status"],
-        deviceName: msg["deviceName"],
+        deviceID: `${msg["nodeId"]}`,
+        deviceID: msg["status"],
       })
       .then((status) => {
         return;
@@ -86,8 +85,10 @@ router.use(express.urlencoded({ extended: true }));
 router.post("/createLockStatus", (req, res) => {
   lockstatus
     .create({
-      nodeId: req.body.nodeId,
-      status: req.body.status,
+      deviceID: req.body.deviceID,
+      acutalState: req.body.acutalState,
+      deviceName: req.body.deviceName,
+      deviceType: req.body.deviceType,
     })
     .then((status) => {
       console.log(`lock status... ID : ${req.body}`);
@@ -104,16 +105,16 @@ router.post("/createLockStatus", (req, res) => {
 
 router.post("/updateLockStatus", (req, res) => {
   lockstatus
-    .find({ nodeId: req.body.nodeId })
+    .find({ deviceID: req.body.deviceID })
     .updateOne({
-      nodeId: req.body.nodeId,
-      status: req.body.status,
+      deviceID: req.body.deviceID,
+      acutalState: req.body.acutalState,
     })
     .then((status) => {
-      console.log(`Updated Lock status: ${req.body.status}`);
+      console.log(`Updated Lock status: ${req.body.acutalState}`);
       msg = JSON.stringify({
-        nodeId: req.body.nodeId,
-        status: req.body.status,
+        deviceID: req.body.deviceID,
+        acutalState: req.body.acutalState,
       });
 
       client.publish("/lock/publishStatus", msg);
@@ -131,26 +132,26 @@ router.post("/updateLockStatus", (req, res) => {
 
 router.get("/getNodeID", (req, res) => {
   lockstatus
-    .find({ nodeId: req.body.nodeId })
+    .find({ deviceID: req.body.deviceID })
     .then((qual) => {
-      console.log(`Found lock ID : ${req.body.nodeId}`);
+      console.log(`Found lock ID : ${req.body.deviceID}`);
       return res.status(200).json({ success: true, quality: qual });
     })
     .catch((err) => {
-      console.log(`no such lock ID found : ${req.body.nodeId}`);
+      console.log(`no such lock ID found : ${req.body.deviceID}`);
       return res.status(500).json({ success: false, message: err.message });
     });
 });
 
 router.get("/DeleteNodeID", (req, res) => {
   lockstatus
-    .deleteOne({ nodeId: req.body.nodeId })
+    .deleteOne({ deviceID: req.body.deviceID })
     .then((qual) => {
-      console.log(`Found lock ID : ${req.body.nodeId}`);
+      console.log(`Found lock ID : ${req.body.deviceID}`);
       return res.status(200).json({ success: true, quality: qual });
     })
     .catch((err) => {
-      console.log(`no such lock ID found : ${req.body.nodeId}`);
+      console.log(`no such lock ID found : ${req.body.deviceID}`);
       return res.status(500).json({ success: false, message: err.message });
     });
 });
@@ -172,13 +173,13 @@ router.get("/getAllNodeID", (req, res) => {
 
 router.get("/getByNode/:nodeId", (req, res) => {
   lockstatus
-    .find({ nodeId: req.params.nodeId })
+    .find({ deviceID: req.params.deviceID })
     .then((values) => {
-      console.log(`lock ID found : ${req.body.nodeId}`);
+      console.log(`lock ID found : ${req.body.deviceID}`);
       return res.status(200).json({ success: true, values: values });
     })
     .catch((err) => {
-      console.log(`no such lock ID found : ${req.body.nodeId}`);
+      console.log(`no such lock ID found : ${req.body.deviceID}`);
       return res.status(500).json({ success: false, message: err.message });
     });
 });
