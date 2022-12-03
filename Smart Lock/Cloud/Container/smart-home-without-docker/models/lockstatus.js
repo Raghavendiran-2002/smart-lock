@@ -7,8 +7,8 @@ const lockSchema = new Schema(
       type: String,
       required: true,
     },
-    acutalState: {
-      type: String,
+    state: {
+      type: Boolean,
       required: true,
     },
     deviceName: {

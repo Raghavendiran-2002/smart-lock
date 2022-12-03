@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HomeDynamic extends StatefulWidget {
@@ -37,20 +36,21 @@ class _HomeDynamicState extends State<HomeDynamic> {
     nodeID = response.data;
     print(nodeID);
     for (Map map in nodeID) {
-      if (map['nodeId'] == '0x01') {
-        nodeStatus[0] = map['status'] == 'true' ? true : false;
-      } else if (map['nodeId'] == '0x02') {
-        nodeStatus[1] = map['status'] == 'true' ? true : false;
+      if (map['deviceID'] == '1') {
+        nodeStatus[0] = map['state'];
+        print(nodeStatus[0]);
+      } else if (map['deviceID'] == '2') {
+        nodeStatus[1] = map['state'];
+        print(nodeStatus[1]);
+      } else if (map['deviceID'] == '3') {
+        nodeStatus[2] = map['state'];
+        print(nodeStatus[2]);
       }
     }
+    print(nodeStatus);
     setState(() {
       isLoading = false;
     });
-  }
-
-  void sendResponse(status, deviceID) async {
-    await dio.post('${IP}/lock/updateLockStatus',
-        data: {"nodeId": deviceID, "status": status});
   }
 
   void _lockRealTimeChanges() {
@@ -128,37 +128,27 @@ class _HomeDynamicState extends State<HomeDynamic> {
                 ),
                 Container(
                   decoration: BoxDecoration(
-                    color: Color(0xFF7D3B68),
+                    color: Color(0xFFDBDBFC),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        "   Logout",
-                        style: TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.bold),
-                      ),
-                      IconButton(
-                        onPressed: () async {
-                          FirebaseAuth.instance.signOut();
-                          GoogleSignIn().signOut();
-                          Navigator.pushNamedAndRemoveUntil(
-                              context, "/", (Route<dynamic> route) => false);
-                        },
-                        icon: Icon(
-                          Icons.logout,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
+                  child: IconButton(
+                    onPressed: () async {
+                      FirebaseAuth.instance.signOut();
+                      GoogleSignIn().signOut();
+                      Navigator.pushNamedAndRemoveUntil(
+                          context, "/", (Route<dynamic> route) => false);
+                    },
+                    icon: Icon(
+                      Icons.logout,
+                      color: Color(0xFF6171DC),
+                      // color: Colors.white,
+                    ),
                   ),
                 ),
               ],
             ),
             SizedBox(
-              height: height / 20,
+              height: height / 40,
             ),
             Text(
               "Good Day, Raghav!😃",
@@ -172,7 +162,7 @@ class _HomeDynamicState extends State<HomeDynamic> {
               height: height / 200,
             ),
             Text(
-              "Manage your Locks",
+              "Manage your Home",
               style: TextStyle(
                 color: Colors.black,
                 // fontWeight: FontWeight.bold,
@@ -182,10 +172,21 @@ class _HomeDynamicState extends State<HomeDynamic> {
             SizedBox(
               height: height / 50,
             ),
+            Text(
+              "${nodeID.length} Devices",
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+            ),
+            SizedBox(
+              height: height / 50,
+            ),
             if (isLoading)
               Center(child: CircularProgressIndicator())
             else
-              CustomDeviceWidget(nodeID, nodeStatus),
+              CustomDeviceWidget(nodeID, nodeStatus, Color(0xFF6171DC)),
             // Expanded(
             //   child: GridView.builder(
             //     padding: EdgeInsets.symmetric(horizontal: 20),
@@ -257,20 +258,18 @@ class _HomeDynamicState extends State<HomeDynamic> {
             // ),
             Center(
               child: Container(
-                height: height / 12,
-                width: width / 4,
                 decoration: BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: BorderRadius.circular(50),
+                  color: Color(0xFFDBDBFC),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: IconButton(
-                  onPressed: () {
+                  onPressed: () async {
                     _launchUrl();
                   },
                   icon: Icon(
-                    Icons.video_camera_back_rounded,
-                    size: 30,
-                    color: Colors.white,
+                    CupertinoIcons.video_camera,
+                    color: Color(0xFF6171DC),
+                    // color: Colors.white,
                   ),
                 ),
               ),
@@ -284,8 +283,10 @@ class _HomeDynamicState extends State<HomeDynamic> {
 
 class CustomDeviceWidget extends StatefulWidget {
   final List nodeID;
-  final List<bool> nodeStatus;
-  CustomDeviceWidget(this.nodeID, this.nodeStatus);
+  List<bool> nodeStatus = [false, false, false, false];
+  final Color WidgetColors;
+  CustomDeviceWidget(this.nodeID, this.nodeStatus, this.WidgetColors);
+
   @override
   State<CustomDeviceWidget> createState() => _CustomDeviceWidgetState();
 }
@@ -296,104 +297,243 @@ class _CustomDeviceWidgetState extends State<CustomDeviceWidget> {
   var IP = "http://192.168.1.6:3000";
   void sendResponse(status, deviceID) async {
     await dio.post('${IP}/lock/updateLockStatus',
-        data: {"nodeId": deviceID, "status": status});
+        data: {"deviceID": deviceID, "state": status});
   }
-
-  Map<String, Icon> iconMapping = {
-    'lock': Icon(
-      CupertinoIcons.lock,
-      size: 50,
-    ),
-    'lamp': Icon(
-      CupertinoIcons.lightbulb,
-      size: 50,
-    ),
-    'fan': Icon(
-      CupertinoIcons.ant,
-      size: 50,
-    ),
-    'lamp': Icon(
-      CupertinoIcons.lightbulb,
-      size: 50,
-    ),
-  };
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: GridView.builder(
-        padding: EdgeInsets.symmetric(horizontal: 20),
+        padding: EdgeInsets.symmetric(horizontal: 10),
         itemCount: widget.nodeID.length,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           // mainAxisExtent: height / 7,
-          crossAxisSpacing: 25.0,
-          mainAxisSpacing: 25.0,
+          crossAxisSpacing: 15.0,
+          mainAxisSpacing: 15.0,
           childAspectRatio: 1,
         ),
         itemBuilder: (BuildContext context, int index) {
           // return CustomLockSwitch(nodeData[index], context, index);
           return GestureDetector(
             onTap: () {
-              showMaterialModalBottomSheet(
-                backgroundColor: Colors.transparent,
-                context: context,
-                builder: (context) => Container(
-                  height: 210,
-                  decoration: BoxDecoration(
-                    color: Color(0xFFC3B3F0),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                ),
-              );
+              bool val = !widget.nodeStatus[index];
+              sendResponse(val, widget.nodeID[index]['deviceID']);
+              setState(() {
+                widget.nodeStatus[index] = val;
+              });
+
+              // showMaterialModalBottomSheet(
+              //   backgroundColor: Colors.transparent,
+              //   context: context,
+              //   builder: (context) => Container(
+              //     height: 210,
+              //     decoration: BoxDecoration(
+              //       color: Color(0xFFC3B3F0),
+              //       borderRadius: BorderRadius.circular(15),
+              //     ),
+              //   ),
+              // );
             },
-            child: Container(
-              decoration: BoxDecoration(
-                color: Color(0xFFC3B3F0),
-                borderRadius: BorderRadius.circular(25),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      widget.nodeStatus[index] ? Text("ON") : Text("OFF"),
-                      // deviceIcon(1),
-                      // iconMapping["lamp"]!,
-                      iconMapping[widget.nodeID[index]['deviceType']]!,
-                      Text(
-                        widget.nodeID[index]['deviceID'],
-                        style: TextStyle(
-                          color: Colors.grey[700],
-                          fontSize: 15,
+            child: widget.nodeStatus[index]
+                ? Container(
+                    padding: EdgeInsets.symmetric(vertical: 6, horizontal: 15),
+                    decoration: BoxDecoration(
+                      color: Color(0xFF6171DC),
+                      // color: Color(0xFF6171DC),
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            deviceIconWidget(Colors.white,
+                                widget.nodeID[index]['deviceType']!),
+                            Transform.scale(
+                              scale: 0.7,
+                              child: CupertinoSwitch(
+                                activeColor: Colors.white54,
+                                value: widget.nodeStatus[index],
+                                onChanged: (val) {
+                                  sendResponse(
+                                      val, widget.nodeID[index]['deviceID']);
+                                  setState(() {
+                                    widget.nodeStatus[index] = val;
+                                  });
+                                },
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      Text(
-                        widget.nodeID[index]['deviceName'],
-                        style: TextStyle(
-                          color: Colors.grey[700],
-                          fontSize: 15,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Text(
+                              widget.nodeID[index]['deviceType'],
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              widget.nodeID[index]['deviceID'],
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
+                        widget.nodeStatus[index]
+                            ? Text(
+                                "ON",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
+                              )
+                            : Text(
+                                "OFF",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
+                              ),
+                      ],
+                    ), //BoxDecoration
+                  )
+                : Container(
+                    decoration: BoxDecoration(
+                      color: Color(0xFFDBDBFC),
+                      // color: Color(0xFF6171DC),
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            // deviceIcon(1),
+                            // iconMapping["lamp"]!,
+                            deviceIconWidget(Color(0xFF6171DC),
+                                widget.nodeID[index]['deviceType']!),
+                            // iconMapping[widget.nodeID[index]['deviceType']]!,
+                            Text(
+                              widget.nodeID[index]['deviceID'],
+                              style: TextStyle(
+                                color: Color(0xFF6171DC),
+                                fontSize: 15,
+                              ),
+                            ),
+                            Text(
+                              widget.nodeID[index]['deviceName'],
+                              style: TextStyle(
+                                color: Color(0xFF6171DC),
+                                fontSize: 12,
+                              ),
+                            ),
+                            Text(
+                              widget.nodeID[index]['deviceType'],
+                              style: TextStyle(
+                                  color: Color(0xFF6171DC),
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            widget.nodeStatus[index]
+                                ? Text(
+                                    "ON",
+                                    style: TextStyle(
+                                      color: Color(0xFF6171DC),
+                                      fontSize: 12,
+                                    ),
+                                  )
+                                : Text(
+                                    "OFF",
+                                    style: TextStyle(
+                                      color: Color(0xFF6171DC),
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                          ],
+                        ),
+                        CupertinoSwitch(
+                          activeColor: Colors.white54,
+                          value: widget.nodeStatus[index],
+                          onChanged: (val) {
+                            sendResponse(val, widget.nodeID[index]['deviceID']);
+                            setState(() {
+                              widget.nodeStatus[index] = val;
+                            });
+                          },
+                        ),
+                      ],
+                    ), //BoxDecoration
                   ),
-                  CupertinoSwitch(
-                    activeColor: Colors.white54,
-                    value: widget.nodeStatus[index],
-                    onChanged: (val) {
-                      sendResponse(val, widget.nodeID[index]['deviceID']);
-                      setState(() {
-                        widget.nodeStatus[index] = val;
-                      });
-                    },
-                  ),
-                ],
-              ), //BoxDecoration
-            ),
           );
         },
       ),
     );
+  }
+}
+
+class deviceIconWidget extends StatelessWidget {
+  late Color color;
+  late String icon;
+  deviceIconWidget(this.color, this.icon);
+
+  @override
+  Widget build(BuildContext context) {
+    Map<String, Icon> iconWhiteMapping = {
+      'lock': Icon(
+        CupertinoIcons.lock,
+        size: 50,
+        color: Colors.white,
+      ),
+      'lamp': Icon(
+        CupertinoIcons.lightbulb,
+        size: 50,
+        color: Colors.white,
+      ),
+      'fan': Icon(
+        CupertinoIcons.ant,
+        size: 50,
+        color: Colors.white,
+      ),
+      'lamp': Icon(
+        CupertinoIcons.ant,
+        size: 50,
+        color: Colors.white,
+      ),
+    };
+    Map<String, Icon> iconBlueMapping = {
+      'lock': Icon(
+        CupertinoIcons.lock,
+        size: 50,
+        color: Color(0xFF6171DC),
+      ),
+      'lamp': Icon(
+        CupertinoIcons.lightbulb,
+        size: 50,
+        color: Color(0xFF6171DC),
+      ),
+      'fan': Icon(
+        CupertinoIcons.ant,
+        size: 50,
+        color: Color(0xFF6171DC),
+      ),
+      'lamp': Icon(
+        CupertinoIcons.ant,
+        size: 50,
+        color: Color(0xFF6171DC),
+      ),
+    };
+    return color == Colors.white
+        ? iconWhiteMapping[icon]!
+        : iconBlueMapping[icon]!;
   }
 }

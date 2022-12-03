@@ -86,7 +86,7 @@ router.post("/createLockStatus", (req, res) => {
   lockstatus
     .create({
       deviceID: req.body.deviceID,
-      acutalState: req.body.acutalState,
+      state: req.body.state,
       deviceName: req.body.deviceName,
       deviceType: req.body.deviceType,
     })
@@ -107,14 +107,14 @@ router.post("/updateLockStatus", (req, res) => {
   lockstatus
     .find({ deviceID: req.body.deviceID })
     .updateOne({
-      deviceID: req.body.deviceID,
-      acutalState: req.body.acutalState,
+      // deviceID: req.body.deviceID,
+      state: req.body.state,
     })
     .then((status) => {
-      console.log(`Updated Lock status: ${req.body.acutalState}`);
+      console.log(`Updated Lock status: ${req.body.state}`);
       msg = JSON.stringify({
         deviceID: req.body.deviceID,
-        acutalState: req.body.acutalState,
+        state: req.body.state,
       });
 
       client.publish("/lock/publishStatus", msg);
