@@ -3,6 +3,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_lock/workflow/home-flow/screens/homeScreen.dart';
 import 'package:smart_lock/workflow/home-flow/screens/homeScreenDynamic.dart';
+import 'package:smart_lock/workflow/home-flow/services/bluetooth-services.dart';
+import 'package:smart_lock/workflow/home-flow/services/offdoc.dart';
 import 'package:smart_lock/workflow/login-flow/otp_screen.dart';
 import 'package:smart_lock/workflow/login-flow/screens/LoginScreen.dart';
 
@@ -31,12 +33,13 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Foodly',
-      initialRoute: "homedy",
+      initialRoute: "bluetooth",
       routes: {
         "/": (context) => LoginScreen(),
         "home": (context) => HomeScreen(),
         "homedy": (context) => HomeDynamic(),
-        // "bluetooth": (context) => Bluetooth_services(),
+        "blue": (context) => FlutterBlueApp(),
+        "bluetooth": (context) => Bluetooth_Devices_Connected(),
         "login": (context) =>
             OTPScreen(verificationID: _userUID!, phoneNumber: _phoneNumber!),
       },

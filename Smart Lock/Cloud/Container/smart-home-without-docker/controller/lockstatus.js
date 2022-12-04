@@ -103,7 +103,6 @@ router.post("/updateLockStatus", (req, res) => {
   lockstatus
     .find({ deviceID: req.body.deviceID })
     .updateOne({
-      // deviceID: req.body.deviceID,
       deviceState: req.body.deviceState,
     })
     .then((status) => {
