@@ -33,12 +33,11 @@ client.on("connect", () => {
 client.on("message", (topic, payload) => {
   msg = JSON.parse(payload.toString());
   if (msg.hasOwnProperty("status")) {
-    syncFirestore(msg["status"], msg["nodeId"], msg["nodeId"]);
+    syncFirestore(msg["status"], msg["nodeId"], msg["status"]);
     lockstatus
       .find({ deviceID: msg["nodeId"] })
       .updateOne({
-        deviceID: `${msg["nodeId"]}`,
-        deviceID: msg["status"],
+        deviceState: msg["status"],
       })
       .then((status) => {
         return;
@@ -64,9 +63,6 @@ async function syncFirestore(state, nodeID, isUpdate) {
   db = getFirestore();
   const smartlockdb = db.collection("lockRealTime").doc("0AlIjID2eJovhzl3SDRl");
   await smartlockdb.update({
-    isChanged: state,
-    nodeID: nodeID,
-    isUpdate: !isUpdate,
     isRandom: Math.random(),
   });
 }
@@ -86,7 +82,7 @@ router.post("/createLockStatus", (req, res) => {
   lockstatus
     .create({
       deviceID: req.body.deviceID,
-      state: req.body.state,
+      deviceState: req.body.deviceState,
       deviceName: req.body.deviceName,
       deviceType: req.body.deviceType,
     })
@@ -108,13 +104,13 @@ router.post("/updateLockStatus", (req, res) => {
     .find({ deviceID: req.body.deviceID })
     .updateOne({
       // deviceID: req.body.deviceID,
-      state: req.body.state,
+      deviceState: req.body.deviceState,
     })
     .then((status) => {
-      console.log(`Updated Lock status: ${req.body.state}`);
+      console.log(`Updated Lock status: ${req.body.deviceState}`);
       msg = JSON.stringify({
         deviceID: req.body.deviceID,
-        state: req.body.state,
+        deviceState: req.body.deviceState,
       });
 
       client.publish("/lock/publishStatus", msg);

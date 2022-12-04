@@ -18,8 +18,8 @@ class _HomeDynamicState extends State<HomeDynamic> {
   var userState = ["I'm Home", "I'm Leaving"];
   bool isLoading = true;
   List nodeID = [];
-  // var IP = "http://13.235.244.236:3000";
-  var IP = "http://192.168.1.4:3000";
+  var IP = "http://13.235.244.236:3000";
+  // var IP = "http://192.168.1.4:3000";d
   List<bool> nodeStatus = [false, false, false, false];
   // final Uri _url = Uri.parse('http://proxy60.rt3.io:37278/');
   final Uri _url = Uri.parse('http://172.20.10.4:5001/video_feed');
@@ -35,21 +35,20 @@ class _HomeDynamicState extends State<HomeDynamic> {
 
   void getLockStatus() async {
     var response = await Dio().get('${IP}/lock/getAllNodeID');
+    isLoading = true;
     nodeID = response.data;
     print(nodeID);
     for (Map map in nodeID) {
-      if (map['deviceID'] == '1') {
-        nodeStatus[0] = map['state'];
+      if (map['deviceID'] == '0x01') {
+        nodeStatus[0] = map['deviceState']; //== "true" ? true : false;
         print(nodeStatus[0]);
-      } else if (map['deviceID'] == '2') {
-        nodeStatus[1] = map['state'];
-        print(nodeStatus[1]);
+      } else if (map['deviceID'] == '0x02') {
+        nodeStatus[1] = map['deviceState'];
       } else if (map['deviceID'] == '3') {
-        nodeStatus[2] = map['state'];
-        print(nodeStatus[2]);
+        nodeStatus[2] = map['deviceState'];
       }
     }
-    print(nodeStatus);
+
     setState(() {
       isLoading = false;
     });
@@ -229,26 +228,50 @@ class _HomeDynamicState extends State<HomeDynamic> {
                       showMaterialModalBottomSheet(
                         backgroundColor: Colors.transparent,
                         context: context,
-                        builder: (context) => Container(
-                          height: 210,
-                          decoration: BoxDecoration(
-                            color: Color(0xFFC3B3F0),
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: Row(
-                            children: [
-                              Text("Device Name : "),
-                              Expanded(
-                                child: TextField(
-                                  obscureText: true,
-                                  decoration: InputDecoration(
-                                    border: OutlineInputBorder(),
-                                    labelText: 'Password',
-                                  ),
-                                ),
-                              )
-                              // TextField(),
-                            ],
+                        builder: (context) => SingleChildScrollView(
+                          child: Container(
+                            padding: EdgeInsets.only(
+                                bottom:
+                                    MediaQuery.of(context).viewInsets.bottom),
+                            height: 210,
+                            decoration: BoxDecoration(
+                              color: Color(0xFFC3B3F0),
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: Container(
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 20, horizontal: 20),
+                                child: Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: [
+                                    Expanded(
+                                      child: TextField(
+                                        decoration: InputDecoration(
+                                            border: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(10.0),
+                                            ),
+                                            filled: true,
+                                            hintStyle: TextStyle(
+                                                color: Colors.grey[800]),
+                                            hintText: "Enter Unique CODE",
+                                            fillColor: Colors.white70),
+                                      ),
+                                    ),
+                                    ElevatedButton(
+                                        // Color(0xFF6171DC)
+                                        style: ElevatedButton.styleFrom(
+                                          primary: Colors.white,
+                                        ),
+                                        onPressed: () {},
+                                        child: Text(
+                                          "Connect",
+                                          style: TextStyle(
+                                              color: Color(0xFF6171DC)),
+                                        ))
+                                  ],
+                                )),
                           ),
                         ),
                       );
@@ -309,11 +332,11 @@ class CustomDeviceWidget extends StatefulWidget {
 
 class _CustomDeviceWidgetState extends State<CustomDeviceWidget> {
   var dio = Dio();
-  // var IP = "http://13.235.244.236:3000";
-  var IP = "http://192.168.1.4:3000";
+  var IP = "http://13.235.244.236:3000";
+  // var IP = "http://192.168.1.4:3000";
   void sendResponse(status, deviceID) async {
     await dio.post('${IP}/lock/updateLockStatus',
-        data: {"deviceID": deviceID, "state": status});
+        data: {"deviceID": deviceID, "deviceState": status});
   }
 
   @override

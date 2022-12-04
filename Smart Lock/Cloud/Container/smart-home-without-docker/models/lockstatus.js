@@ -7,7 +7,7 @@ const lockSchema = new Schema(
       type: String,
       required: true,
     },
-    state: {
+    deviceState: {
       type: Boolean,
       required: true,
     },
@@ -23,4 +23,4 @@ const lockSchema = new Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("locks", lockSchema);
+module.exports = mongoose.model("homeDevices", lockSchema);

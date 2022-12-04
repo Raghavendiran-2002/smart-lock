@@ -3,6 +3,6 @@ services:
   app:
     container_name: smart-lock
     restart: always
-    image: raghavendiran2002/smart-lock-local:latest
+    image: raghavendiran2002/smart-home:latest
     ports:
       - '3000:3000'

@@ -6,8 +6,8 @@ require("dotenv").config({ path: "ENV_FILENAME" });
 const app = express();
 console.log("Runing SmartLock");
 mongoose
-  // .connect("mongodb://13.235.99.169/", {
-  .connect("mongodb://localhost:27017/", {
+  .connect("mongodb://13.233.193.140/", {
+    // .connect("mongodb://localhost:27017/", {
     // .connect("mongodb://localhost:27017/", {
 
     useNewUrlParser: true,

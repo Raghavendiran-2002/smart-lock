@@ -36,6 +36,7 @@ class MyApp extends StatelessWidget {
         "/": (context) => LoginScreen(),
         "home": (context) => HomeScreen(),
         "homedy": (context) => HomeDynamic(),
+        // "bluetooth": (context) => Bluetooth_services(),
         "login": (context) =>
             OTPScreen(verificationID: _userUID!, phoneNumber: _phoneNumber!),
       },
