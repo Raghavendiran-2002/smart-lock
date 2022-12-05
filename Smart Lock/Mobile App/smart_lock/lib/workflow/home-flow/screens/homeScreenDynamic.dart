@@ -16,11 +16,12 @@ class HomeDynamic extends StatefulWidget {
 
 class _HomeDynamicState extends State<HomeDynamic> {
   var userState = ["I'm Home", "I'm Leaving"];
+  List<DeviceInfo> devicesInfo = [];
   bool isLoading = true;
-  List nodeID = [];
+
+  // late DeviceInfo deviceinfo;
   var IP = "http://13.235.244.236:3000";
-  // var IP = "http://192.168.1.4:3000";d
-  Map<String, bool> deviceInfo = {};
+  // var IP = "http://192.168.1.4:3000";
 
   // final Uri _url = Uri.parse('http://proxy60.rt3.io:37278/');
   final Uri _url = Uri.parse('http://172.20.10.4:5001/video_feed');
@@ -41,9 +42,10 @@ class _HomeDynamicState extends State<HomeDynamic> {
 
   void getLockStatus() async {
     var response = await Dio().get('${IP}/lock/getAllNodeID');
-    nodeID = response.data;
-    for (Map map in nodeID) {
-      deviceInfo[map['deviceID']] = map['deviceState'];
+
+    for (Map map in response.data) {
+      devicesInfo.add(DeviceInfo(map['deviceID'], map['deviceState'],
+          map['deviceName'], map['deviceType']));
     }
     setState(() {
       isLoading = false;
@@ -170,7 +172,7 @@ class _HomeDynamicState extends State<HomeDynamic> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "${nodeID.length} Devices",
+                  "${devicesInfo.length} Devices",
                   style: TextStyle(
                     color: Colors.black,
                     fontWeight: FontWeight.bold,
@@ -255,7 +257,7 @@ class _HomeDynamicState extends State<HomeDynamic> {
               Expanded(
                 child: GridView.builder(
                   padding: EdgeInsets.symmetric(horizontal: 10),
-                  itemCount: nodeID.length,
+                  itemCount: devicesInfo.length,
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     mainAxisExtent: 100,
@@ -266,30 +268,32 @@ class _HomeDynamicState extends State<HomeDynamic> {
                   itemBuilder: (BuildContext context, int index) {
                     return GestureDetector(
                       onTap: () {
-                        bool val = !deviceInfo[nodeID[index]['deviceID']]!;
-                        deviceInfo[nodeID[index]['deviceID']] =
-                            !nodeID[index]['deviceState'];
-                        print(deviceInfo[nodeID[index]['deviceID']]);
-                        print(nodeID[index]['deviceState']);
-                        sendResponse(val, nodeID[index]['deviceID']);
+                        bool? val = !devicesInfo[index].deviceState!;
+                        devicesInfo[index].deviceState =
+                            !devicesInfo[index].deviceState!;
+                        sendResponse(val, devicesInfo[index].deviceName);
                         setState(() {
-                          deviceInfo[nodeID[index]['deviceID']] = val;
+                          devicesInfo[index].deviceState = val;
                         });
                       },
-                      child: deviceInfo[nodeID[index]['deviceID']]!
+                      child: devicesInfo[index].deviceState!
                           ? CustomDeviceWidget(
-                              nodeID,
-                              deviceInfo[nodeID[index]['deviceID']]!,
+                              devicesInfo[index].deviceID,
+                              devicesInfo[index].deviceName,
+                              devicesInfo[index].deviceType,
+                              devicesInfo[index].deviceState,
                               Color(0xFF6171DC), //0xFFDBDBFC
                               Colors.white,
-                              nodeID[index]['deviceType']!,
+                              // nodeID[index]['deviceType']!,
                               index)
                           : CustomDeviceWidget(
-                              nodeID,
-                              deviceInfo[nodeID[index]['deviceID']]!,
+                              devicesInfo[index].deviceID,
+                              devicesInfo[index].deviceName,
+                              devicesInfo[index].deviceType,
+                              devicesInfo[index].deviceState,
                               Color(0xFFDBDBFC),
                               Color(0xFF6171DC),
-                              nodeID[index]['deviceType']!,
+                              // nodeID[index]['deviceType']!,
                               index),
                     );
                   },
@@ -311,7 +315,6 @@ class _HomeDynamicState extends State<HomeDynamic> {
                   icon: Icon(
                     CupertinoIcons.video_camera,
                     color: Color(0xFF6171DC),
-                    // color: Colors.white,
                   ),
                 ),
               ),
@@ -324,14 +327,23 @@ class _HomeDynamicState extends State<HomeDynamic> {
 }
 
 class CustomDeviceWidget extends StatefulWidget {
-  final List nodeID;
-  final bool deviceStatus;
+  final String? deviceName;
+  final String? deviceID;
+  final String? deviceType;
+  late bool? deviceStatus;
   final Color widgetColors;
   final Color textColors;
-  final String icon;
+  // final String icon;
   final int index;
-  CustomDeviceWidget(this.nodeID, this.deviceStatus, this.widgetColors,
-      this.textColors, this.icon, this.index);
+  CustomDeviceWidget(
+      this.deviceID,
+      this.deviceName,
+      this.deviceType,
+      this.deviceStatus,
+      this.widgetColors,
+      this.textColors,
+      // this.icon,
+      this.index);
 
   @override
   State<CustomDeviceWidget> createState() => _CustomDeviceWidgetState();
@@ -361,17 +373,17 @@ class _CustomDeviceWidgetState extends State<CustomDeviceWidget> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              deviceIconWidget(widget.nodeID[widget.index]['deviceType']!,
-                  widget.deviceStatus),
+              deviceIconWidget(widget.deviceType, widget.deviceStatus),
               Transform.scale(
                 scale: 0.7,
                 child: CupertinoSwitch(
                   activeColor: Colors.white54,
-                  value: widget.deviceStatus,
+                  value: widget.deviceStatus!,
                   onChanged: (val) {
-                    // sendResponse(val, widget.nodeID[widget.index]['deviceID']);
+                    // sendResponse(!val, widget.deviceID);
+                    // // widget.deviceStatus = !val;
                     // setState(() {
-                    //   widget.nodeStatus[widget.index] = val;
+                    //   widget.deviceStatus = val;
                     // });
                   },
                 ),
@@ -382,14 +394,14 @@ class _CustomDeviceWidgetState extends State<CustomDeviceWidget> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               Text(
-                widget.nodeID[widget.index]['deviceType'],
+                widget.deviceName!,
                 style: TextStyle(
                   color: widget.textColors,
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              widget.deviceStatus
+              widget.deviceStatus!
                   ? Text(
                       "ON",
                       style: TextStyle(
@@ -413,8 +425,8 @@ class _CustomDeviceWidgetState extends State<CustomDeviceWidget> {
 }
 
 class deviceIconWidget extends StatelessWidget {
-  late String icon;
-  late bool deviceState;
+  late String? icon;
+  late bool? deviceState;
   deviceIconWidget(this.icon, this.deviceState);
 
   @override
@@ -430,5 +442,35 @@ class deviceIconWidget extends StatelessWidget {
       'tv': CupertinoIcons.tv,
     };
     return Icon(iconMapping[icon], color: iconColoring[deviceState], size: 50);
+  }
+}
+
+class DeviceInfo {
+  String? deviceID;
+  bool? deviceState;
+  String? deviceName;
+  String? deviceType;
+
+  DeviceInfo(
+    this.deviceID,
+    this.deviceState,
+    this.deviceName,
+    this.deviceType,
+  );
+
+  DeviceInfo.fromJson(Map<String, dynamic> json) {
+    deviceID = json['deviceID'];
+    deviceState = json['deviceState'];
+    deviceName = json['deviceName'];
+    deviceType = json['deviceType'];
+  }
+
+  Map<String, dynamic> toJson(Map<dynamic, dynamic> map) {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['deviceID'] = this.deviceID;
+    data['deviceState'] = this.deviceState;
+    data['deviceName'] = this.deviceName;
+    data['deviceType'] = this.deviceType;
+    return data;
   }
 }
