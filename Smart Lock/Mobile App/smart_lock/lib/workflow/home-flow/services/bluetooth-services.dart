@@ -26,45 +26,39 @@ class _Bluetooth_Devices_ConnectedState
 
   void DiscoverSerives(d) async {
     List<BluetoothService> services = await d.discoverServices();
-    services.forEach((service) async {
-      if (service.uuid.toString() == "28406d0e-73e1-11ed-a1eb-0242ac120002") {
-        List<BluetoothCharacteristic> characteristics = service.characteristics;
-        for (BluetoothCharacteristic characteristic in characteristics) {
-          if (characteristic.uuid.toString() ==
-              "beb5483e-36e1-4688-b7f5-ea07361b26a8") {
-            List<int> value = await characteristic.read();
-            print(value);
-            print("**********************************");
-            await characteristic.write("hello".codeUnits);
-          }
-        }
+    print(services[0].uuid.toString());
+    if (services[0].uuid.toString() == "28406d0e-73e1-11ed-a1eb-0242ac120002") {
+      List<BluetoothCharacteristic> characteristics =
+          services[0].characteristics;
+      if (characteristics[0].uuid.toString() ==
+          "beb5483e-36e1-4688-b7f5-ea07361b26a8") {
+        await characteristics[0].write("hello".codeUnits);
+        List<int> value = await characteristics[0].read();
+        print(value);
       }
-    });
+    }
   }
 
   void DiscoverDevice() async {
     var s = await flutterBlue.connectedDevices;
     if (s.length != 0) {
       if (s[0].name.toString() == "MyESP32") {
-        print("Senddddddddd");
         DiscoverSerives(s[0]);
-        // flutterBlue.stopScan();
       }
     } else {
-      // Start scanning
-      flutterBlue.startScan(timeout: Duration(seconds: 4));
-      // Listen to scan results
+      flutterBlue.startScan(timeout: Duration(seconds: 1));
+      bool isFirst = true;
       flutterBlue.scanResults.listen((results) {
-        // do something with scan results
         for (ScanResult r in results) {
           print('${r.device.name} found : ${r.device.id}');
-          if (r.device.name.toString() == "MyESP32") {
-            print(r.device);
+          if (r.device.id.toString() ==
+                  "9BA0DA5B-3DE5-BFFE-7879-CFCBA5F5D2B5" &&
+              isFirst) {
             connectBLEDevice(r.device);
+            isFirst = false;
           }
         }
       });
-      // Stop scanning
       flutterBlue.stopScan();
     }
   }

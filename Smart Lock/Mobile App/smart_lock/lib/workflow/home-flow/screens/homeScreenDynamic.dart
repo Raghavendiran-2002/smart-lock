@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HomeDynamic extends StatefulWidget {
@@ -15,6 +14,7 @@ class HomeDynamic extends StatefulWidget {
 }
 
 class _HomeDynamicState extends State<HomeDynamic> {
+  late var UniqueCode;
   var userState = ["I'm Home", "I'm Leaving"];
   List<DeviceInfo> devicesInfo = [];
   bool isLoading = true;
@@ -72,6 +72,21 @@ class _HomeDynamicState extends State<HomeDynamic> {
         }
       });
     });
+  }
+
+  void getDevicesBleDetails(uniqueCode) {
+    FirebaseFirestore.instance
+        .collection("DevicesBLE")
+        .doc('TWyZKbxkEnHireMaTumt')
+        .get()
+        .then((DocumentSnapshot doc) {
+      final data = doc.data() as Map<String, dynamic>;
+      print(data['0x01']['uniqueCode']);
+      print(data['0x01']['uniqueID']);
+    });
+    // .where("uniqueCode", isEqualTo: UniqueCode)
+
+    // print(det.);
   }
 
   void displaySnackBar(String message, {Color color = Colors.red}) {
@@ -188,56 +203,104 @@ class _HomeDynamicState extends State<HomeDynamic> {
                   ),
                   child: IconButton(
                     onPressed: () async {
-                      showMaterialModalBottomSheet(
-                        backgroundColor: Colors.transparent,
+                      showDialog(
                         context: context,
-                        builder: (context) => SingleChildScrollView(
-                          child: Container(
-                            padding: EdgeInsets.only(
-                                bottom:
-                                    MediaQuery.of(context).viewInsets.bottom),
-                            height: 210,
-                            decoration: BoxDecoration(
-                              color: Color(0xFFC3B3F0),
-                              borderRadius: BorderRadius.circular(15),
+                        builder: (BuildContext context) {
+                          return Dialog(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
                             ),
                             child: Container(
-                                padding: EdgeInsets.symmetric(
-                                    vertical: 20, horizontal: 20),
-                                child: Column(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
-                                  children: [
-                                    Expanded(
-                                      child: TextField(
-                                        decoration: InputDecoration(
-                                            border: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(10.0),
-                                            ),
-                                            filled: true,
-                                            hintStyle: TextStyle(
-                                                color: Colors.grey[800]),
-                                            hintText: "Enter Unique CODE",
-                                            fillColor: Colors.white70),
-                                      ),
-                                    ),
-                                    ElevatedButton(
-                                        // Color(0xFF6171DC)
-                                        style: ElevatedButton.styleFrom(
-                                          primary: Colors.white,
+                              height: 150,
+                              padding: EdgeInsets.only(
+                                  left: 20, right: 20, top: 20, bottom: 10),
+                              child: Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  TextField(
+                                    onChanged: (text) {
+                                      UniqueCode = text;
+                                    },
+                                    decoration: InputDecoration(
+                                        border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10.0),
                                         ),
-                                        onPressed: () {},
-                                        child: Text(
-                                          "Connect",
-                                          style: TextStyle(
-                                              color: Color(0xFF6171DC)),
-                                        ))
-                                  ],
-                                )),
-                          ),
-                        ),
+                                        filled: true,
+                                        hintStyle:
+                                            TextStyle(color: Colors.grey[800]),
+                                        hintText: "Enter Unique CODE",
+                                        fillColor: Colors.white70),
+                                  ),
+                                  ElevatedButton(
+                                    // Color(0xFF6171DC)
+                                    style: ElevatedButton.styleFrom(
+                                      primary: Color(0xFF6171DC),
+                                    ),
+                                    onPressed: () {
+                                      getDevicesBleDetails(UniqueCode);
+                                    },
+                                    child: Text(
+                                      "Connect",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
                       );
+
+                      // showMaterialModalBottomSheet(
+                      //   backgroundColor: Colors.transparent,
+                      //   context: context,
+                      //   builder: (context) => Container(
+                      //     height: 210,
+                      //     decoration: BoxDecoration(
+                      //       color: Color(0xFFC3B3F0),
+                      //       borderRadius: BorderRadius.circular(15),
+                      //     ),
+                      //     child: Container(
+                      //         padding: EdgeInsets.symmetric(
+                      //             vertical: 20, horizontal: 20),
+                      //         child: Column(
+                      //           mainAxisAlignment:
+                      //               MainAxisAlignment.spaceAround,
+                      //           children: [
+                      //             TextField(
+                      //               onChanged: (text) {
+                      //                 UniqueCode = text;
+                      //               },
+                      //               decoration: InputDecoration(
+                      //                   border: OutlineInputBorder(
+                      //                     borderRadius:
+                      //                         BorderRadius.circular(10.0),
+                      //                   ),
+                      //                   filled: true,
+                      //                   hintStyle:
+                      //                       TextStyle(color: Colors.grey[800]),
+                      //                   hintText: "Enter Unique CODE",
+                      //                   fillColor: Colors.white70),
+                      //             ),
+                      //             ElevatedButton(
+                      //                 // Color(0xFF6171DC)
+                      //                 style: ElevatedButton.styleFrom(
+                      //                   primary: Colors.white,
+                      //                 ),
+                      //                 onPressed: () {
+                      //                   getDevicesBleDetails(UniqueCode);
+                      //                 },
+                      //                 child: Text(
+                      //                   "Connect",
+                      //                   style:
+                      //                       TextStyle(color: Color(0xFF6171DC)),
+                      //                 ))
+                      //           ],
+                      //         )),
+                      //   ),
+                      // );
                     },
                     icon: Icon(
                       CupertinoIcons.add,
@@ -293,7 +356,6 @@ class _HomeDynamicState extends State<HomeDynamic> {
                               devicesInfo[index].deviceState,
                               Color(0xFFDBDBFC),
                               Color(0xFF6171DC),
-                              // nodeID[index]['deviceType']!,
                               index),
                     );
                   },
