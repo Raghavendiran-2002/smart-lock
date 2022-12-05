@@ -20,7 +20,8 @@ class _HomeDynamicState extends State<HomeDynamic> {
   List nodeID = [];
   var IP = "http://13.235.244.236:3000";
   // var IP = "http://192.168.1.4:3000";d
-  List<bool> nodeStatus = [false, false, false, false];
+  Map<String, bool> deviceInfo = {};
+
   // final Uri _url = Uri.parse('http://proxy60.rt3.io:37278/');
   final Uri _url = Uri.parse('http://172.20.10.4:5001/video_feed');
   var dio = Dio();
@@ -33,22 +34,17 @@ class _HomeDynamicState extends State<HomeDynamic> {
     }
   }
 
+  void sendResponse(status, deviceID) async {
+    await dio.post('${IP}/lock/updateLockStatus',
+        data: {"deviceID": deviceID, "deviceState": status});
+  }
+
   void getLockStatus() async {
     var response = await Dio().get('${IP}/lock/getAllNodeID');
-    isLoading = true;
     nodeID = response.data;
-    print(nodeID);
     for (Map map in nodeID) {
-      if (map['deviceID'] == '0x01') {
-        nodeStatus[0] = map['deviceState']; //== "true" ? true : false;
-        print(nodeStatus[0]);
-      } else if (map['deviceID'] == '0x02') {
-        nodeStatus[1] = map['deviceState'];
-      } else if (map['deviceID'] == '3') {
-        nodeStatus[2] = map['deviceState'];
-      }
+      deviceInfo[map['deviceID']] = map['deviceState'];
     }
-
     setState(() {
       isLoading = false;
     });
@@ -91,9 +87,6 @@ class _HomeDynamicState extends State<HomeDynamic> {
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
-
-  Color color = Colors.red;
-  bool press = false;
 
   @override
   void initState() {
@@ -173,38 +166,6 @@ class _HomeDynamicState extends State<HomeDynamic> {
             SizedBox(
               height: height / 30,
             ),
-            // Flexible(
-            //   child: GridView.builder(
-            //     itemCount: 2,
-            //     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            //       mainAxisSpacing: 15.0,
-            //       crossAxisSpacing: 15.0,
-            //       childAspectRatio: 2,
-            //       crossAxisCount: 2,
-            //     ),
-            //     itemBuilder: (BuildContext context, int index) {
-            //       // return CustomLockSwitch(nodeData[index], context, index);
-            //       return Container(
-            //         decoration: BoxDecoration(
-            //           color: Color(0xFFDBDBFC),
-            //           borderRadius: BorderRadius.circular(10),
-            //         ),
-            //         child: Padding(
-            //           padding:
-            //               EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-            //           child: Text(
-            //             userState[index],
-            //             style: TextStyle(
-            //               color: Colors.white,
-            //               fontWeight: FontWeight.bold,
-            //               fontSize: 20,
-            //             ),
-            //           ),
-            //         ),
-            //       );
-            //     },
-            //   ),
-            // ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -291,7 +252,49 @@ class _HomeDynamicState extends State<HomeDynamic> {
             if (isLoading)
               Center(child: CircularProgressIndicator())
             else
-              CustomDeviceWidget(nodeID, nodeStatus, Color(0xFF6171DC)),
+              Expanded(
+                child: GridView.builder(
+                  padding: EdgeInsets.symmetric(horizontal: 10),
+                  itemCount: nodeID.length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisExtent: 100,
+                    crossAxisSpacing: 15.0,
+                    mainAxisSpacing: 15.0,
+                    childAspectRatio: 1,
+                  ),
+                  itemBuilder: (BuildContext context, int index) {
+                    return GestureDetector(
+                      onTap: () {
+                        bool val = !deviceInfo[nodeID[index]['deviceID']]!;
+                        deviceInfo[nodeID[index]['deviceID']] =
+                            !nodeID[index]['deviceState'];
+                        print(deviceInfo[nodeID[index]['deviceID']]);
+                        print(nodeID[index]['deviceState']);
+                        sendResponse(val, nodeID[index]['deviceID']);
+                        setState(() {
+                          deviceInfo[nodeID[index]['deviceID']] = val;
+                        });
+                      },
+                      child: deviceInfo[nodeID[index]['deviceID']]!
+                          ? CustomDeviceWidget(
+                              nodeID,
+                              deviceInfo[nodeID[index]['deviceID']]!,
+                              Color(0xFF6171DC), //0xFFDBDBFC
+                              Colors.white,
+                              nodeID[index]['deviceType']!,
+                              index)
+                          : CustomDeviceWidget(
+                              nodeID,
+                              deviceInfo[nodeID[index]['deviceID']]!,
+                              Color(0xFFDBDBFC),
+                              Color(0xFF6171DC),
+                              nodeID[index]['deviceType']!,
+                              index),
+                    );
+                  },
+                ),
+              ),
             SizedBox(
               height: height / 35,
             ),
@@ -322,9 +325,13 @@ class _HomeDynamicState extends State<HomeDynamic> {
 
 class CustomDeviceWidget extends StatefulWidget {
   final List nodeID;
-  List<bool> nodeStatus = [false, false, false, false];
-  final Color WidgetColors;
-  CustomDeviceWidget(this.nodeID, this.nodeStatus, this.WidgetColors);
+  final bool deviceStatus;
+  final Color widgetColors;
+  final Color textColors;
+  final String icon;
+  final int index;
+  CustomDeviceWidget(this.nodeID, this.deviceStatus, this.widgetColors,
+      this.textColors, this.icon, this.index);
 
   @override
   State<CustomDeviceWidget> createState() => _CustomDeviceWidgetState();
@@ -341,225 +348,87 @@ class _CustomDeviceWidgetState extends State<CustomDeviceWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: GridView.builder(
-        padding: EdgeInsets.symmetric(horizontal: 10),
-        itemCount: widget.nodeID.length,
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          mainAxisExtent: 100,
-          crossAxisSpacing: 15.0,
-          mainAxisSpacing: 15.0,
-          childAspectRatio: 1,
-        ),
-        itemBuilder: (BuildContext context, int index) {
-          // return CustomLockSwitch(nodeData[index], context, index);
-          return GestureDetector(
-            onTap: () {
-              bool val = !widget.nodeStatus[index];
-              sendResponse(val, widget.nodeID[index]['deviceID']);
-              setState(() {
-                widget.nodeStatus[index] = val;
-              });
-              // showMaterialModalBottomSheet(
-              //   backgroundColor: Colors.transparent,
-              //   context: context,
-              //   builder: (context) => Container(
-              //     height: 210,
-              //     decoration: BoxDecoration(
-              //       color: Color(0xFFC3B3F0),
-              //       borderRadius: BorderRadius.circular(15),
-              //     ),
-              //   ),
-              // );
-            },
-            child: widget.nodeStatus[index]
-                ? Container(
-                    padding: EdgeInsets.symmetric(vertical: 6, horizontal: 15),
-                    decoration: BoxDecoration(
-                      color: Color(0xFF6171DC),
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            deviceIconWidget(Colors.white,
-                                widget.nodeID[index]['deviceType']!),
-                            Transform.scale(
-                              scale: 0.7,
-                              child: CupertinoSwitch(
-                                activeColor: Colors.white54,
-                                value: widget.nodeStatus[index],
-                                onChanged: (val) {
-                                  sendResponse(
-                                      val, widget.nodeID[index]['deviceID']);
-                                  setState(() {
-                                    widget.nodeStatus[index] = val;
-                                  });
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            Text(
-                              widget.nodeID[index]['deviceType'],
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            widget.nodeStatus[index]
-                                ? Text(
-                                    "ON",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                    ),
-                                  )
-                                : Text(
-                                    "OFF",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                          ],
-                        ),
-                      ],
-                    ), //BoxDecoration
-                  )
-                : Container(
-                    padding: EdgeInsets.symmetric(vertical: 6, horizontal: 15),
-                    decoration: BoxDecoration(
-                      color: Color(0xFFDBDBFC),
-                      // color: Color(0xFF6171DC),
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // deviceIcon(1),
-                        // iconMapping["lamp"]!,
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            deviceIconWidget(Color(0xFF6171DC),
-                                widget.nodeID[index]['deviceType']!),
-                            Transform.scale(
-                              scale: 0.7,
-                              child: CupertinoSwitch(
-                                activeColor: Colors.white54,
-                                value: widget.nodeStatus[index],
-                                onChanged: (val) {
-                                  sendResponse(
-                                      val, widget.nodeID[index]['deviceID']);
-                                  setState(() {
-                                    widget.nodeStatus[index] = val;
-                                  });
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            Text(
-                              widget.nodeID[index]['deviceType'],
-                              style: TextStyle(
-                                  color: Color(0xFF6171DC),
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            widget.nodeStatus[index]
-                                ? Text(
-                                    "ON",
-                                    style: TextStyle(
-                                      color: Color(0xFF6171DC),
-                                      fontSize: 12,
-                                    ),
-                                  )
-                                : Text(
-                                    "OFF",
-                                    style: TextStyle(
-                                      color: Color(0xFF6171DC),
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                          ],
-                        ),
-                      ],
-                    ), //BoxDecoration
-                  ),
-          );
-        },
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 6, horizontal: 15),
+      decoration: BoxDecoration(
+        color: widget.widgetColors,
+        borderRadius: BorderRadius.circular(15),
       ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              deviceIconWidget(widget.nodeID[widget.index]['deviceType']!,
+                  widget.deviceStatus),
+              Transform.scale(
+                scale: 0.7,
+                child: CupertinoSwitch(
+                  activeColor: Colors.white54,
+                  value: widget.deviceStatus,
+                  onChanged: (val) {
+                    // sendResponse(val, widget.nodeID[widget.index]['deviceID']);
+                    // setState(() {
+                    //   widget.nodeStatus[widget.index] = val;
+                    // });
+                  },
+                ),
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Text(
+                widget.nodeID[widget.index]['deviceType'],
+                style: TextStyle(
+                  color: widget.textColors,
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              widget.deviceStatus
+                  ? Text(
+                      "ON",
+                      style: TextStyle(
+                        color: widget.textColors,
+                        fontSize: 12,
+                      ),
+                    )
+                  : Text(
+                      "OFF",
+                      style: TextStyle(
+                        color: widget.textColors,
+                        fontSize: 12,
+                      ),
+                    ),
+            ],
+          ),
+        ],
+      ), //BoxDecoration
     );
   }
 }
 
 class deviceIconWidget extends StatelessWidget {
-  late Color color;
   late String icon;
-  deviceIconWidget(this.color, this.icon);
+  late bool deviceState;
+  deviceIconWidget(this.icon, this.deviceState);
 
   @override
   Widget build(BuildContext context) {
-    Map<String, Icon> iconWhiteMapping = {
-      'lock': Icon(
-        CupertinoIcons.lock,
-        size: 50,
-        color: Colors.white,
-      ),
-      'lamp': Icon(
-        CupertinoIcons.lightbulb,
-        size: 50,
-        color: Colors.white,
-      ),
-      'fan': Icon(
-        CupertinoIcons.dial_fill,
-        size: 50,
-        color: Colors.white,
-      ),
-      'tv': Icon(
-        CupertinoIcons.tv,
-        size: 50,
-        color: Colors.white,
-      ),
+    Map<bool, Color> iconColoring = {
+      true: Colors.white,
+      false: Color(0xFF6171DC),
     };
-    Map<String, Icon> iconBlueMapping = {
-      'lock': Icon(
-        CupertinoIcons.lock,
-        size: 50,
-        color: Color(0xFF6171DC),
-      ),
-      'lamp': Icon(
-        CupertinoIcons.lightbulb,
-        size: 50,
-        color: Color(0xFF6171DC),
-      ),
-      'fan': Icon(
-        CupertinoIcons.dial_fill,
-        size: 50,
-        color: Color(0xFF6171DC),
-      ),
-      'tv': Icon(
-        CupertinoIcons.tv,
-        size: 50,
-        color: Color(0xFF6171DC),
-      ),
+    Map<String, IconData> iconMapping = {
+      'lock': CupertinoIcons.lock,
+      'lamp': CupertinoIcons.lightbulb,
+      'fan': CupertinoIcons.dial_fill,
+      'tv': CupertinoIcons.tv,
     };
-    return color == Colors.white
-        ? iconWhiteMapping[icon]!
-        : iconBlueMapping[icon]!;
+    return Icon(iconMapping[icon], color: iconColoring[deviceState], size: 50);
   }
 }

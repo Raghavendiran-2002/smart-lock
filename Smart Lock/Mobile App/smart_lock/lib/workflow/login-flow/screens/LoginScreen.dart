@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
 
-import '../../home-flow/screens/homeScreen.dart';
+import '../../home-flow/screens/homeScreenDynamic.dart';
 import '../services/GoogleAuth.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -35,7 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (BuildContext context) => HomeScreen(),
+          builder: (BuildContext context) => HomeDynamic(),
         ),
       );
     } else {

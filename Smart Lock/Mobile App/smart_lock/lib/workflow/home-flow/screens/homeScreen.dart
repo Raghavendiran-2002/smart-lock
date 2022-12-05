@@ -183,75 +183,6 @@ class _HomeScreenState extends State<HomeScreen> {
               Center(child: CircularProgressIndicator())
             else
               CustomDeviceWidget(nodeID, nodeStatus),
-            // Expanded(
-            //   child: GridView.builder(
-            //     padding: EdgeInsets.symmetric(horizontal: 20),
-            //     itemCount: nodeID.length,
-            //     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            //       crossAxisCount: 2,
-            //       // mainAxisExtent: height / 7,
-            //       crossAxisSpacing: 25.0,
-            //       mainAxisSpacing: 10.0,
-            //       childAspectRatio: 1,
-            //     ),
-            //     itemBuilder: (BuildContext context, int index) {
-            //       // return CustomLockSwitch(nodeData[index], context, index);
-            //       return GestureDetector(
-            //         onTap: () {
-            //           showMaterialModalBottomSheet(
-            //             backgroundColor: Colors.transparent,
-            //             context: context,
-            //             builder: (context) => Container(
-            //               height: 210,
-            //               decoration: BoxDecoration(
-            //                 color: Color(0xFFC3B3F0),
-            //                 borderRadius: BorderRadius.circular(15),
-            //               ),
-            //             ),
-            //           );
-            //         },
-            //         child: Container(
-            //           decoration: BoxDecoration(
-            //             color: Color(0xFFC3B3F0),
-            //             borderRadius: BorderRadius.circular(25),
-            //           ),
-            //           child: Row(
-            //             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            //             children: [
-            //               Column(
-            //                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            //                 children: [
-            //                   nodeStatus[index] ? Text("ON") : Text("OFF"),
-            //                   Icon(
-            //                     CupertinoIcons.lock,
-            //                     size: 50,
-            //                   ),
-            //                   Text(
-            //                     nodeID[index]['nodeId'],
-            //                     style: TextStyle(
-            //                       color: Colors.grey[700],
-            //                       fontSize: 15,
-            //                     ),
-            //                   ),
-            //                 ],
-            //               ),
-            //               CupertinoSwitch(
-            //                 activeColor: Colors.white54,
-            //                 value: nodeStatus[index],
-            //                 onChanged: (val) {
-            //                   sendResponse(val, nodeID[index]['nodeId']);
-            //                   setState(() {
-            //                     nodeStatus[index] = val;
-            //                   });
-            //                 },
-            //               ),
-            //             ],
-            //           ), //BoxDecoration
-            //         ),
-            //       );
-            //     },
-            //   ),
-            // ),
             Center(
               child: Container(
                 height: height / 12,
@@ -300,6 +231,7 @@ class _CustomDeviceWidgetState extends State<CustomDeviceWidget> {
   Widget build(BuildContext context) {
     return Expanded(
       child: GridView.builder(
+        physics: NeverScrollableScrollPhysics(),
         padding: EdgeInsets.symmetric(horizontal: 20),
         itemCount: widget.nodeID.length,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

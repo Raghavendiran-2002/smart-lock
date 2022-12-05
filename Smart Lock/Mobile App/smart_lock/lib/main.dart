@@ -33,7 +33,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Foodly',
-      initialRoute: "bluetooth",
+      // initialRoute: "bluetooth",
+      initialRoute: "homedy",
       routes: {
         "/": (context) => LoginScreen(),
         "home": (context) => HomeScreen(),
