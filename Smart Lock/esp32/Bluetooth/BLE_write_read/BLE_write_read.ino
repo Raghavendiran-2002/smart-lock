@@ -72,7 +72,7 @@ void setup() {
 
 
   DynamicJsonDocument doc(1024);
-  doc["deviceUID"] = "0z0z00z0x0v0cb0";
+  doc["deviceUID"] = "";
   doc["deviceID"] = "0x01";
   char message[100];
   serializeJson(doc, message);

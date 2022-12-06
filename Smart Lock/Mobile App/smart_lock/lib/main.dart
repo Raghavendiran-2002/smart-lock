@@ -3,7 +3,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_lock/workflow/home-flow/screens/homeScreen.dart';
 import 'package:smart_lock/workflow/home-flow/screens/homeScreenDynamic.dart';
-import 'package:smart_lock/workflow/home-flow/services/bluetooth.dart';
 import 'package:smart_lock/workflow/login-flow/otp_screen.dart';
 import 'package:smart_lock/workflow/login-flow/screens/LoginScreen.dart';
 
@@ -39,7 +38,7 @@ class MyApp extends StatelessWidget {
         "home": (context) => HomeScreen(),
         "homedy": (context) => HomeDynamic(),
         // "blue": (context) => FlutterBlueApp(),
-        "bluetooth": (context) => Bluetooth(),
+        // "bluetooth": (context) => Bluetooth(),
         "login": (context) =>
             OTPScreen(verificationID: _userUID!, phoneNumber: _phoneNumber!),
       },

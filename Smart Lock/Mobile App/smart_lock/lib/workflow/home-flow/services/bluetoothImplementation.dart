@@ -39,26 +39,33 @@ class CustomBluetoothImplementation {
     await ble.write(msg.codeUnits);
   }
 
-  void discoverDevice(String UID) async {
-    var s = await flutterBlue.connectedDevices;
-    if (s.length != 0) {
-      if (s[0].id.toString() == UID) {
-        initServiceCharacteristic(s[0]);
-      }
-    } else {
-      flutterBlue.startScan(timeout: Duration(seconds: 1));
-      bool isFirst = true;
-      flutterBlue.scanResults.listen((results) {
-        for (ScanResult r in results) {
-          print('${r.device.name} found : ${r.device.id}');
-          if (r.device.id.toString() == UID && isFirst) {
-            connectBLEDevice(r.device);
-            isFirst = false;
-          }
+  Future<bool> discoverDevice(String UID) async {
+    bool isConnected = false;
+    await flutterBlue.connectedDevices.then((value) {
+      if (value.length != 0) {
+        if (value[0].id.toString() == UID) {
+          initServiceCharacteristic(value[0]);
+          isConnected = true;
         }
-      });
-      flutterBlue.stopScan();
-    }
+      } else {
+        flutterBlue.startScan(timeout: Duration(seconds: 1));
+        bool isFirst = true;
+        flutterBlue.scanResults.listen((results) {
+          for (ScanResult r in results) {
+            if (r.device.id.toString() == UID && isFirst) {
+              connectBLEDevice(r.device);
+              isConnected = true;
+              isFirst = false;
+              flutterBlue.stopScan();
+              break;
+            }
+          }
+        });
+      }
+    });
+    // isConnected == null ? isConnected = true : isConnected = false;
+    print(isConnected);
+    return isConnected;
   }
 
   void getDevicesBleDetails(uniqueCode) {

@@ -1,13 +1,18 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:rounded_loading_button/rounded_loading_button.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../services/offdoc.dart';
+import '../services/bluetoothImplementation.dart';
+import 'addNewDevice.dart';
 
 class HomeDynamic extends StatefulWidget {
   const HomeDynamic({Key? key}) : super(key: key);
@@ -21,6 +26,9 @@ class _HomeDynamicState extends State<HomeDynamic> {
   var userState = ["I'm Home", "I'm Leaving"];
   List<DeviceInfo> devicesInfo = [];
   bool isLoading = true;
+  late bool isBluetoothOn;
+  final RoundedLoadingButtonController _btnController =
+      RoundedLoadingButtonController();
 
   // late DeviceInfo deviceinfo;
   var IP = "http://13.235.244.236:3000";
@@ -45,7 +53,6 @@ class _HomeDynamicState extends State<HomeDynamic> {
 
   void getLockStatus() async {
     var response = await Dio().get('${IP}/lock/getAllNodeID');
-    // print(response.data.length);
     int defaultLength = response.data.length;
     int index = 0;
     for (Map map in response.data) {
@@ -59,7 +66,6 @@ class _HomeDynamicState extends State<HomeDynamic> {
       }
       index++;
     }
-    print(devicesInfo[0].deviceID);
     setState(() {
       isLoading = false;
     });
@@ -87,21 +93,55 @@ class _HomeDynamicState extends State<HomeDynamic> {
     });
   }
 
-  void getDevicesBleDetails(uniqueCode) {
-    FirebaseFirestore.instance
-        .collection("DevicesBLE")
-        .doc('TWyZKbxkEnHireMaTumt')
-        .get()
-        .then((DocumentSnapshot doc) {
-      final data = doc.data() as Map<String, dynamic>;
-      print(data['0x01']['uniqueCode']);
-      print(data['0x01']['uniqueID']);
-      CustomBluetoothImplementation.instance
-          .discoverDevice(data['0x01']['uniqueCode']);
-    });
-    // .where("uniqueCode", isEqualTo: UniqueCode)
-
-    // print(det.);
+  void ConnectDevice(
+      uniqueCode, RoundedLoadingButtonController controller) async {
+    Future<bool> isConnected;
+    if (isBluetoothOn == true) {
+      FirebaseFirestore.instance
+          .collection("DevicesBLE")
+          .doc('TWyZKbxkEnHireMaTumt')
+          .get()
+          .then((DocumentSnapshot doc) async {
+        final data = doc.data() as Map<String, dynamic>;
+        print(data['0x01']['uniqueCode']);
+        print(data['0x01']['uniqueID']);
+        isConnected = CustomBluetoothImplementation.instance
+            .discoverDevice(data['0x01']['uniqueCode']);
+        print(await isConnected);
+        // new Future.delayed(Duration(seconds: 2), () {
+        //   isConnected = false as Future<bool>;
+        //   print('delayed execution');
+        // });
+        if (await isConnected) {
+          setState(() {
+            controller.success();
+          });
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (BuildContext context) => AddNewDevice(),
+            ),
+          );
+        } else if (!await isConnected) {
+          setState(() {
+            controller.error();
+          });
+        }
+      });
+      // if(FlutterBluePlus.instance.)
+      // if (isConnected) {
+      //   setState(() {
+      //     // controller.error();
+      //     controller.success();
+      //   });
+      //   Navigator.pushReplacement(
+      //     context,
+      //     MaterialPageRoute(
+      //       builder: (BuildContext context) => AddNewDevice(),
+      //     ),
+      //   );
+      // }
+    } else {}
   }
 
   void displaySnackBar(String message, {Color color = Colors.red}) {
@@ -218,6 +258,10 @@ class _HomeDynamicState extends State<HomeDynamic> {
                   ),
                   child: IconButton(
                     onPressed: () async {
+                      bool blestate = await FlutterBluePlus.instance.isOn;
+                      setState(() {
+                        isBluetoothOn = blestate;
+                      });
                       showDialog(
                         context: context,
                         builder: (BuildContext context) {
@@ -248,19 +292,52 @@ class _HomeDynamicState extends State<HomeDynamic> {
                                         hintText: "Enter Unique CODE",
                                         fillColor: Colors.white70),
                                   ),
-                                  ElevatedButton(
-                                    // Color(0xFF6171DC)
-                                    style: ElevatedButton.styleFrom(
-                                      primary: Color(0xFF6171DC),
-                                    ),
-                                    onPressed: () {
-                                      getDevicesBleDetails(UniqueCode);
-                                    },
-                                    child: Text(
-                                      "Connect",
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                                  ),
+                                  isBluetoothOn
+                                      ? RoundedLoadingButton(
+                                          // animateOnTap: false,
+                                          color: Color(0xFF6171DC),
+                                          successColor: Color(0xFFC3B3F0),
+                                          controller: _btnController,
+                                          duration: Duration(seconds: 2),
+                                          onPressed: () {
+                                            ConnectDevice(
+                                                UniqueCode, _btnController);
+                                          },
+                                          valueColor: Colors.black,
+                                          borderRadius: 10,
+                                          child: Text("Connect",
+                                              style: TextStyle(
+                                                  color: Colors.white)),
+                                        )
+                                      : RoundedLoadingButton(
+                                          // animateOnTap: false,
+                                          color: Color(0xFF6171DC),
+                                          successColor: Color(0xFFC3B3F0),
+                                          controller: _btnController,
+                                          duration: Duration(seconds: 2),
+                                          onPressed: () {
+                                            // getDevicesBleDetails(
+                                            //     UniqueCode, _btnController);
+                                          },
+                                          valueColor: Colors.black,
+                                          borderRadius: 10,
+                                          child: Text("Turn ON Bluetooth",
+                                              style: TextStyle(
+                                                  color: Colors.white)),
+                                        ),
+                                  // ElevatedButton(
+                                  //   // Color(0xFF6171DC)
+                                  //   style: ElevatedButton.styleFrom(
+                                  //     primary: Color(0xFF6171DC),
+                                  //   ),
+                                  //   onPressed: () {
+                                  //     getDevicesBleDetails(UniqueCode);
+                                  //   },
+                                  //   child: Text(
+                                  //     isConnect ? "Disconnect" : "Connect",
+                                  //     style: TextStyle(color: Colors.white),
+                                  //   ),
+                                  // ),
                                 ],
                               ),
                             ),
