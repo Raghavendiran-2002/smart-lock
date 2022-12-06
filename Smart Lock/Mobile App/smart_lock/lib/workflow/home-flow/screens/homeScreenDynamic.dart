@@ -7,6 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../services/offdoc.dart';
+
 class HomeDynamic extends StatefulWidget {
   const HomeDynamic({Key? key}) : super(key: key);
 
@@ -15,7 +17,7 @@ class HomeDynamic extends StatefulWidget {
 }
 
 class _HomeDynamicState extends State<HomeDynamic> {
-  late var UniqueCode;
+  var UniqueCode = '0x01';
   var userState = ["I'm Home", "I'm Leaving"];
   List<DeviceInfo> devicesInfo = [];
   bool isLoading = true;
@@ -43,11 +45,21 @@ class _HomeDynamicState extends State<HomeDynamic> {
 
   void getLockStatus() async {
     var response = await Dio().get('${IP}/lock/getAllNodeID');
-
+    // print(response.data.length);
+    int defaultLength = response.data.length;
+    int index = 0;
     for (Map map in response.data) {
-      devicesInfo.add(DeviceInfo(map['deviceID'], map['deviceState'],
-          map['deviceName'], map['deviceType']));
+      if (devicesInfo.length < response.data.length) {
+        devicesInfo.add(DeviceInfo(map['deviceID'], map['deviceState'],
+            map['deviceName'], map['deviceType']));
+      }
+      if (defaultLength == response.data.length) {
+        devicesInfo[index] = DeviceInfo(map['deviceID'], map['deviceState'],
+            map['deviceName'], map['deviceType']);
+      }
+      index++;
     }
+    print(devicesInfo[0].deviceID);
     setState(() {
       isLoading = false;
     });
@@ -84,6 +96,8 @@ class _HomeDynamicState extends State<HomeDynamic> {
       final data = doc.data() as Map<String, dynamic>;
       print(data['0x01']['uniqueCode']);
       print(data['0x01']['uniqueID']);
+      CustomBluetoothImplementation.instance
+          .discoverDevice(data['0x01']['uniqueCode']);
     });
     // .where("uniqueCode", isEqualTo: UniqueCode)
 
@@ -336,34 +350,35 @@ class _HomeDynamicState extends State<HomeDynamic> {
                         bool? val = !devicesInfo[index].deviceState!;
                         devicesInfo[index].deviceState =
                             !devicesInfo[index].deviceState!;
-                        sendResponse(val, devicesInfo[index].deviceName);
+                        sendResponse(val, devicesInfo[index].deviceID);
                         setState(() {
                           devicesInfo[index].deviceState = val;
                         });
                       },
-                      child: devicesInfo[index].deviceState!
-                          ? CustomDeviceWidget(
-                              devicesInfo[index].deviceID,
-                              devicesInfo[index].deviceName,
-                              devicesInfo[index].deviceType,
-                              devicesInfo[index].deviceState,
-                              devicesInfo[index].deviceState!
-                                  ? Color(0xFF6171DC)
-                                  : Color(0xFFDBDBFC), //0xFFDBDBFC
-                              devicesInfo[index].deviceState!
-                                  ? Colors.white
-                                  : Color(0xFF6171DC),
-                              // nodeID[index]['deviceType']!,
-                              index)
-                          : CustomDeviceWidget(
-                              devicesInfo[index].deviceID,
-                              devicesInfo[index].deviceName,
-                              devicesInfo[index].deviceType,
-                              devicesInfo[index].deviceState,
-                              Color(0xFFDBDBFC),
-                              Color(0xFF6171DC),
-                              index),
+                      // child: devicesInfo[index].deviceState!
+                      child: CustomDeviceWidget(
+                          devicesInfo[index].deviceID,
+                          devicesInfo[index].deviceName,
+                          devicesInfo[index].deviceType,
+                          devicesInfo[index].deviceState,
+                          devicesInfo[index].deviceState!
+                              ? Color(0xFF6171DC)
+                              : Color(0xFFDBDBFC), //0xFFDBDBFC
+                          devicesInfo[index].deviceState!
+                              ? Colors.white
+                              : Color(0xFF6171DC),
+                          // nodeID[index]['deviceType']!,
+                          index),
                     );
+                    //       : CustomDeviceWidget(
+                    //           devicesInfo[index].deviceID,
+                    //           devicesInfo[index].deviceName,
+                    //           devicesInfo[index].deviceType,
+                    //           devicesInfo[index].deviceState,
+                    //           Color(0xFFDBDBFC),
+                    //           Color(0xFF6171DC),
+                    //           index),
+                    // );
                   },
                 ),
               ),

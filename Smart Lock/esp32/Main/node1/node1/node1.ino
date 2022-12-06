@@ -8,10 +8,11 @@
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);  
 int variable = 0;
+int pin = 4;
 
 // WiFi
-const char *ssid = "BIRAC_API"; // Enter your WiFi name
-const char *password = "10267042";  // Enter WiFi password
+const char *ssid = "Raghavendiran"; // Enter your WiFi name
+const char *password = "apple@5g";  // Enter WiFi password
 
 const char *mqtt_broker = "13.233.193.140";
 const char *topic = "/lock/status";
@@ -24,9 +25,9 @@ PubSubClient client(espClient);
 
 void setup() {
    Serial.begin(115200);
-   pinMode(2, OUTPUT);
+   pinMode(pin, OUTPUT);
 
-   digitalWrite(2, HIGH);
+   digitalWrite(pin, HIGH);
    SPI.begin();      
    mfrc522.PCD_Init(); 
    WiFi.begin(ssid, password);
@@ -85,16 +86,16 @@ void callback(char *topic, byte *payload, unsigned int length) {
  }
  DynamicJsonDocument doc(1024); 
  deserializeJson(doc, message);
- bool state = doc["status"]; 
- const int deviceUID = doc["nodeId"];
- if(doc["nodeId"] == "0x01"){
+ bool state = doc["deviceState"]; 
+ const char* deviceUID = doc["deviceID"];
+ if(doc["deviceID"] == "0x01"){
    Serial.println(state); 
    if (state == true){
           Serial.println("Lock is OPEN");
-          digitalWrite(2, LOW);
+          digitalWrite(pin, LOW);
    }
    else {
-          digitalWrite(2, HIGH);
+          digitalWrite(pin, HIGH);
           Serial.println("Lock is CLOSED");
    }
  }
@@ -127,7 +128,7 @@ void loop() {
     Serial.println(" Authorized Access ");
     Serial.println();
     PublishMessage(true);
-    digitalWrite(2, LOW);
+    digitalWrite(pin, LOW);
   }
   else  {
     Serial.println(" Access Denied ");

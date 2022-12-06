@@ -220,8 +220,8 @@ class CustomDeviceWidget extends StatefulWidget {
 
 class _CustomDeviceWidgetState extends State<CustomDeviceWidget> {
   var dio = Dio();
-  // var IP = "http://13.235.244.236:3000";
-  var IP = "http://192.168.1.6:3000";
+  var IP = "http://13.235.244.236:3000";
+  // var IP = "http://192.168.1.6:3000";
   void sendResponse(status, deviceID) async {
     await dio.post('${IP}/lock/updateLockStatus',
         data: {"nodeId": deviceID, "status": status});
