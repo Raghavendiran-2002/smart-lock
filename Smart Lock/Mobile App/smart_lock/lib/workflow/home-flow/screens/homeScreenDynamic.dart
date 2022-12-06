@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -330,7 +331,8 @@ class _HomeDynamicState extends State<HomeDynamic> {
                   ),
                   itemBuilder: (BuildContext context, int index) {
                     return GestureDetector(
-                      onTap: () {
+                      onTap: () async {
+                        HapticFeedback.lightImpact();
                         bool? val = !devicesInfo[index].deviceState!;
                         devicesInfo[index].deviceState =
                             !devicesInfo[index].deviceState!;
@@ -345,8 +347,12 @@ class _HomeDynamicState extends State<HomeDynamic> {
                               devicesInfo[index].deviceName,
                               devicesInfo[index].deviceType,
                               devicesInfo[index].deviceState,
-                              Color(0xFF6171DC), //0xFFDBDBFC
-                              Colors.white,
+                              devicesInfo[index].deviceState!
+                                  ? Color(0xFF6171DC)
+                                  : Color(0xFFDBDBFC), //0xFFDBDBFC
+                              devicesInfo[index].deviceState!
+                                  ? Colors.white
+                                  : Color(0xFF6171DC),
                               // nodeID[index]['deviceType']!,
                               index)
                           : CustomDeviceWidget(
