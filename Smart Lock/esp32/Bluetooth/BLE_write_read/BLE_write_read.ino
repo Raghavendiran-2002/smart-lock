@@ -1,8 +1,8 @@
 
 
 #include <BLEDevice.h>
-#include <BLEUtils.h>
-#include <BLEServer.h>
+// #include <BLEUtils.h>
+// #include <BLEServer.h>
 #include <ArduinoJson.h>
 
 // See the following for generating UUIDs:
@@ -18,7 +18,7 @@ class MyCallbacks: public BLECharacteristicCallbacks {
     void onWrite(BLECharacteristic *pCharacteristic) {
       std::string value = pCharacteristic->getValue();
       
-      char message[20];
+      char message[value.length()];
 
       if (value.length() > 0) {
         Serial.println("*********");
@@ -31,8 +31,8 @@ class MyCallbacks: public BLECharacteristicCallbacks {
        DynamicJsonDocument doc(1024); 
        deserializeJson(doc, Serial);
        deserializeJson(doc, message);
-       bool a = doc["state"];
-       Serial.println(a);
+//       char* a = doc["wifi"];
+//       Serial.println(a);
        Serial.println("*********");
       }
     

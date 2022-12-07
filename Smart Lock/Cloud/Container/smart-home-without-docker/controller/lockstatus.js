@@ -3,7 +3,6 @@ const mqtt = require("mqtt");
 const router = express.Router();
 const { getFirestore } = require("firebase-admin/firestore");
 var admin = require("firebase-admin");
-const nodemailer = require("nodemailer");
 
 var serviceAccount = require("./smartlock.json");
 
@@ -68,35 +67,13 @@ async function syncFirestore(state, nodeID, isUpdate) {
   });
 }
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: "raghavendiran222222@gmail.com",
-    pass: "nikgkgvjjzlnwkrs",
-  },
-});
-
-async function sendMain() {
-  transporter
-    .sendMail({
-      from: "raghavendiran222222@gmail.com", // sender address
-      to: "124158084@sastra.ac.in", // list of receivers
-      subject: "Intruder Alert!!!", // Subject line
-      text: "There is a new article. It's about sending emails, check it out!", // plain text body
-      html: "<b>There is a new article. It's about sending emails, check it out!</b>", // html body
-    })
-    .then((info) => {
-      console.log({ info });
-    })
-    .catch(console.error);
-}
 async function WrongID() {
   db = getFirestore();
   const smartlockdb = db.collection("wrongID").doc("6tsfk3UyPScZ6DX7Qhdg");
   await smartlockdb.update({
     wrong: Math.random(),
   });
-  sendMain();
+  // sendMain();
 }
 
 router.use(express.json());

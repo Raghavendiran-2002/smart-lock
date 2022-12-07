@@ -31,13 +31,15 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Foodly',
-      // initialRoute: "bluetooth",
       initialRoute: "homedy",
+      // initialRoute: "adddevice",
       routes: {
         "/": (context) => LoginScreen(),
         "home": (context) => HomeScreen(),
         "homedy": (context) => HomeDynamic(),
-        // "blue": (context) => FlutterBlueApp(),
+        // "adddevice": (context) => AddNewDevice(
+        //       deviceID: "0x00",
+        //     ),
         // "bluetooth": (context) => Bluetooth(),
         "login": (context) =>
             OTPScreen(verificationID: _userUID!, phoneNumber: _phoneNumber!),

@@ -5,6 +5,7 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 class CustomBluetoothImplementation {
   FlutterBluePlus flutterBlue = FlutterBluePlus.instance;
+  late BluetoothDevice connectedDevice;
   void connectBLEDevice(BluetoothDevice device) async {
     await device.connect(autoConnect: false);
     initServiceCharacteristic(device);
@@ -27,6 +28,22 @@ class CustomBluetoothImplementation {
     }
   }
 
+  void writeWiFiCreds(wifi, passwd) async {
+    List<BluetoothService> services = await connectedDevice.discoverServices();
+    if (services[0].uuid.toString() == "28406d0e-73e1-11ed-a1eb-0242ac120002") {
+      List<BluetoothCharacteristic> characteristics =
+          services[0].characteristics;
+      if (characteristics[0].uuid.toString() ==
+          "beb5483e-36e1-4688-b7f5-ea07361b26a8") {
+        readValue(characteristics[0]);
+        final json = '{ "wifi": "${wifi}", "passwd" : "${passwd}" }';
+        var msg = jsonDecode(json);
+        print(msg['wifi']);
+        writeValue(json, characteristics[0]);
+      }
+    }
+  }
+
   void readValue(BluetoothCharacteristic ble) async {
     List<int> value = await ble.read();
     // await ble.read().
@@ -45,6 +62,7 @@ class CustomBluetoothImplementation {
       if (value.length != 0) {
         if (value[0].id.toString() == UID) {
           initServiceCharacteristic(value[0]);
+          connectedDevice = value[0];
           isConnected = true;
         }
       } else {
@@ -53,6 +71,7 @@ class CustomBluetoothImplementation {
         flutterBlue.scanResults.listen((results) {
           for (ScanResult r in results) {
             if (r.device.id.toString() == UID && isFirst) {
+              connectedDevice = r.device;
               connectBLEDevice(r.device);
               isConnected = true;
               isFirst = false;

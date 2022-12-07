@@ -1,0 +1,40 @@
+const chokidar = require("chokidar");
+const nodemailer = require("nodemailer");
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: "raghavendiran222222@gmail.com",
+    pass: "nikgkgvjjzlnwkrs",
+  },
+});
+
+async function sendMain() {
+  transporter
+    .sendMail({
+      from: "raghavendiran222222@gmail.com", // sender address
+      to: "124158084@sastra.ac.in", // list of receivers
+      subject: "Intruder Alert!!!", // Subject line
+      text: "There is a new article. It's about sending emails, check it out!", // plain text body
+      attachments: [
+        {
+          path: "/Users/raghavendiran/Development/College/Project/Smart Lock/RaspberryPi/Intrusion-Detection/intruder/unknown1.png",
+          filename: "Intruder!!.png",
+          content: "Intruder On Alert!",
+        },
+      ],
+    })
+    .then((info) => {
+      console.log({ info });
+    })
+    .catch(console.error);
+}
+
+chokidar
+  .watch(
+    "/Users/raghavendiran/Development/College/Project/Smart Lock/RaspberryPi/Intrusion-Detection/intruder"
+  )
+  .on("add", (event, path) => {
+    console.log("Sendinggg.....Mail");
+    sendMain();
+  });

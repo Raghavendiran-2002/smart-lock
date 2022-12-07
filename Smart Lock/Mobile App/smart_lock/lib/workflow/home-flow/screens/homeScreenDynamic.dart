@@ -108,10 +108,6 @@ class _HomeDynamicState extends State<HomeDynamic> {
         isConnected = CustomBluetoothImplementation.instance
             .discoverDevice(data['0x01']['uniqueCode']);
         print(await isConnected);
-        // new Future.delayed(Duration(seconds: 2), () {
-        //   isConnected = false as Future<bool>;
-        //   print('delayed execution');
-        // });
         if (await isConnected) {
           setState(() {
             controller.success();
@@ -119,7 +115,9 @@ class _HomeDynamicState extends State<HomeDynamic> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (BuildContext context) => AddNewDevice(),
+              builder: (BuildContext context) => AddNewDevice(
+                deviceID: data['0x01']['uniqueID'],
+              ),
             ),
           );
         } else if (!await isConnected) {
@@ -175,7 +173,7 @@ class _HomeDynamicState extends State<HomeDynamic> {
     height = size.height;
     width = size.width;
     return Scaffold(
-      // backgroundColor: Color(0xFFD5E1F4),
+      backgroundColor: Colors.white,
       body: Container(
         padding: EdgeInsets.symmetric(vertical: 50, horizontal: 15),
         child: Column(
@@ -310,12 +308,14 @@ class _HomeDynamicState extends State<HomeDynamic> {
                                                   color: Colors.white)),
                                         )
                                       : RoundedLoadingButton(
-                                          // animateOnTap: false,
+                                          animateOnTap: false,
                                           color: Color(0xFF6171DC),
                                           successColor: Color(0xFFC3B3F0),
                                           controller: _btnController,
                                           duration: Duration(seconds: 2),
                                           onPressed: () {
+                                            print("Turn ON");
+                                            FlutterBluePlus.instance.turnOn;
                                             // getDevicesBleDetails(
                                             //     UniqueCode, _btnController);
                                           },
