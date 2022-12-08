@@ -20,10 +20,10 @@ class CustomBluetoothImplementation {
       if (characteristics[0].uuid.toString() ==
           "beb5483e-36e1-4688-b7f5-ea07361b26a8") {
         readValue(characteristics[0]);
-        final json = '{ "name": "Pizza da Mario" }';
+        final json = '{ "status": "Ready" }';
         var k = jsonDecode(json);
-        print(k['name']);
-        writeValue("hg", characteristics[0]);
+        print(k['status']);
+        writeValue(k, characteristics[0]);
       }
     }
   }

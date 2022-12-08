@@ -35,7 +35,7 @@ class _HomeDynamicState extends State<HomeDynamic> {
   // var IP = "http://192.168.1.4:3000";
 
   // final Uri _url = Uri.parse('http://proxy60.rt3.io:37278/');
-  final Uri _url = Uri.parse('http://172.20.10.4:5001/video_feed');
+  final Uri _url = Uri.parse('http://192.168.1.4:5001/video_feed');
   var dio = Dio();
   final firestoreInstance = FirebaseFirestore.instance;
   var orientation, size, height, width;

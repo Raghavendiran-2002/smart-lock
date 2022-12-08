@@ -61,9 +61,11 @@ class MyCallbacks: public BLECharacteristicCallbacks {
         }
        DynamicJsonDocument doc(1024); 
        deserializeJson(doc, Serial);
-       deserializeJson(doc, message);
-       eepromData(doc["wifi"], doc["passwd"]);
-       Serial.println("*********");
+       if(doc["status"] == "Ready"){
+        deserializeJson(doc, message);
+        eepromData(doc["wifi"], doc["passwd"]);
+        Serial.println("*********");
+       }
       }
     
 };

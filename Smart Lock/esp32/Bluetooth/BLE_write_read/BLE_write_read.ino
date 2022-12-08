@@ -1,8 +1,8 @@
 
 
 #include <BLEDevice.h>
-// #include <BLEUtils.h>
-// #include <BLEServer.h>
+#include <BLEUtils.h>
+#include <BLEServer.h>
 #include <ArduinoJson.h>
 
 // See the following for generating UUIDs:
@@ -84,6 +84,5 @@ void setup() {
 
 
 void loop() {
-  // put your main code here, to run repeatedly:
   delay(2000);
 }
