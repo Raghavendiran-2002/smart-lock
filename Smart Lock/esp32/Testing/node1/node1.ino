@@ -26,7 +26,6 @@ PubSubClient client(espClient);
 void setup() {
    Serial.begin(115200);
    pinMode(pin, OUTPUT);
-
    digitalWrite(pin, HIGH);
    SPI.begin();      
    mfrc522.PCD_Init(); 
