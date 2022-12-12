@@ -15,7 +15,7 @@ async function sendMain() {
       from: "raghavendiran222222@gmail.com", // sender address
       to: "124158084@sastra.ac.in", // list of receivers
       subject: "Intruder Alert!!!", // Subject line
-      text: "There is a new article. It's about sending emails, check it out!", // plain text body
+      text: "Visit your House as soon as possible", // plain text body
       attachments: [
         {
           path: "/Users/raghavendiran/Development/College/Project/Smart Lock/RaspberryPi/Intrusion-Detection/intruder/unknown1.png",

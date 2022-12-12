@@ -35,7 +35,7 @@ class _HomeDynamicState extends State<HomeDynamic> {
   // var IP = "http://192.168.1.4:3000";
 
   // final Uri _url = Uri.parse('http://proxy60.rt3.io:37278/');
-  final Uri _url = Uri.parse('http://192.168.1.4:5001/video_feed');
+  final Uri _url = Uri.parse('http://192.168.1.3:5001/video_feed');
   var dio = Dio();
   final firestoreInstance = FirebaseFirestore.instance;
   var orientation, size, height, width;
@@ -83,10 +83,12 @@ class _HomeDynamicState extends State<HomeDynamic> {
     });
   }
 
+  bool wrngID = true;
   void _wrongIDNotify() {
     firestoreInstance.collection("wrongID").snapshots().listen((result) {
       result.docChanges.forEach((res) {
-        if (res.type == DocumentChangeType.modified) {
+        if (res.type == DocumentChangeType.modified && wrngID) {
+          wrngID = false;
           displaySnackBar("Invalid ID!  😓");
         }
       });
@@ -152,10 +154,15 @@ class _HomeDynamicState extends State<HomeDynamic> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
       ),
-      duration: Duration(seconds: 4),
+      duration: Duration(seconds: 1),
       padding: EdgeInsets.symmetric(vertical: 20, horizontal: 20),
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    Future.delayed(const Duration(seconds: 5), () {
+      print("HI");
+      wrngID = true;
+      // _wrongIDNotify();
+    });
   }
 
   @override

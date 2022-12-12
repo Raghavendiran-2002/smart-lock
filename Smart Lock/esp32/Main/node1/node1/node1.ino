@@ -8,7 +8,8 @@
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);  
 int variable = 0;
-int pin = 4;
+const int relay = 26;
+bool inits = true;
 
 // WiFi
 // const char *ssid = "Raghavendiran"; // Enter your WiFi name
@@ -28,14 +29,13 @@ PubSubClient client(espClient);
 
 void setup() {
    Serial.begin(115200);
-   pinMode(pin, OUTPUT);
+   pinMode(relay, OUTPUT);
 
-   digitalWrite(pin, HIGH);
+   digitalWrite(relay, HIGH);
    SPI.begin();      
    mfrc522.PCD_Init(); 
    WiFi.begin(ssid, password);
    WifiConnect();
-   client.subscribe("/lock/publishStatus");
    client.subscribe("/lock/publishStatus");
 }
 
@@ -91,17 +91,19 @@ void callback(char *topic, byte *payload, unsigned int length) {
  deserializeJson(doc, message);
  bool state = doc["deviceState"]; 
  const char* deviceUID = doc["deviceID"];
- if(doc["deviceID"] == "0x01"){
-   Serial.println(state); 
-   if (state == true){
+// if(doc["deviceID"] == "0x01"){
+//   Serial.println(state); 
+   if (state){
+    Serial.println(state); 
           Serial.println("Lock is OPEN");
-          digitalWrite(pin, LOW);
+          digitalWrite(relay, LOW);
    }
-   else {
-          digitalWrite(pin, HIGH);
+   else if(!state){
+    Serial.println(state); 
+          digitalWrite(relay, HIGH);
           Serial.println("Lock is CLOSED");
    }
- }
+// }
 }
 void loop() {
  client.loop();
@@ -131,10 +133,15 @@ void loop() {
     Serial.println(" Authorized Access ");
     Serial.println();
     PublishMessage(true);
-    digitalWrite(pin, LOW);
+    digitalWrite(relay, LOW);
   }
   else  {
     Serial.println(" Access Denied ");
-    WrongID();
+    if(inits){
+      inits = false;
+      WrongID();
+    }
+    delay(3);
+    inits = true;
   }
 }
