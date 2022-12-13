@@ -159,9 +159,7 @@ class _HomeDynamicState extends State<HomeDynamic> {
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
     Future.delayed(const Duration(seconds: 5), () {
-      print("HI");
       wrngID = true;
-      // _wrongIDNotify();
     });
   }
 
