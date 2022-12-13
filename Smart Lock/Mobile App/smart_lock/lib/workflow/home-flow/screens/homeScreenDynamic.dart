@@ -32,7 +32,7 @@ class _HomeDynamicState extends State<HomeDynamic> {
 
   // late DeviceInfo deviceinfo;
   var IP = "http://13.235.244.236:3000";
-  // var IP = "http://192.168.1.4:3000";
+  // var IP = "http://192.168.1.3:3000";
 
   // final Uri _url = Uri.parse('http://proxy60.rt3.io:37278/');
   final Uri _url = Uri.parse('http://192.168.1.3:5001/video_feed');
@@ -52,7 +52,14 @@ class _HomeDynamicState extends State<HomeDynamic> {
   }
 
   void getLockStatus() async {
-    var response = await Dio().get('${IP}/lock/getAllNodeID');
+    // var s = await Dio().post('${IP}/lock/signIn',
+    //     data: {"username": "user1", "password": "password1"});
+    // print(s.headers);
+    // print(s.statusCode);
+    // print(s.headers['set-cookie']);
+    var response = await Dio().get(
+      '${IP}/lock/getAllNodeID',
+    );
     int defaultLength = response.data.length;
     int index = 0;
     for (Map map in response.data) {

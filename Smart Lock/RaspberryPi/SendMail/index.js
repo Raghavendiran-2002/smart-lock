@@ -18,7 +18,7 @@ async function sendMain() {
       text: "Visit your House as soon as possible", // plain text body
       attachments: [
         {
-          path: "/Users/raghavendiran/Development/College/Project/Smart Lock/RaspberryPi/Intrusion-Detection/intruder/unknown1.png",
+          path: "/Users/raghavendiran/Desktop/Smart-Lock/Intrusion-Detection/intruder/unknown1.png",
           filename: "Intruder!!.png",
           content: "Intruder On Alert!",
         },
@@ -32,7 +32,8 @@ async function sendMain() {
 
 chokidar
   .watch(
-    "/Users/raghavendiran/Development/College/Project/Smart Lock/RaspberryPi/Intrusion-Detection/intruder"
+    "/Users/raghavendiran/Desktop/Smart-Lock/Intrusion-Detection/intruder",
+    { ignoreInitial: true }
   )
   .on("add", (event, path) => {
     console.log("Sendinggg.....Mail");
