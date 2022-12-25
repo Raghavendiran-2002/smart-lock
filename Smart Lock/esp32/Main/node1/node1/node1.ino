@@ -31,7 +31,7 @@ void setup() {
    Serial.begin(115200);
    pinMode(relay, OUTPUT);
 
-   digitalWrite(relay, HIGH);
+   digitalWrite(relay, LOW);
    SPI.begin();      
    mfrc522.PCD_Init(); 
    WiFi.begin(ssid, password);
@@ -91,19 +91,19 @@ void callback(char *topic, byte *payload, unsigned int length) {
  deserializeJson(doc, message);
  bool state = doc["deviceState"]; 
  const char* deviceUID = doc["deviceID"];
-// if(doc["deviceID"] == "0x01"){
+ if(doc["deviceID"] == "0x01"){
 //   Serial.println(state); 
    if (state){
     Serial.println(state); 
           Serial.println("Lock is OPEN");
-          digitalWrite(relay, LOW);
+          digitalWrite(relay, HIGH);
    }
    else if(!state){
     Serial.println(state); 
-          digitalWrite(relay, HIGH);
+          digitalWrite(relay, LOW);
           Serial.println("Lock is CLOSED");
    }
-// }
+ }
 }
 void loop() {
  client.loop();

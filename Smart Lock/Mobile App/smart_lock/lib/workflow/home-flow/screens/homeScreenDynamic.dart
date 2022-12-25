@@ -31,11 +31,11 @@ class _HomeDynamicState extends State<HomeDynamic> {
       RoundedLoadingButtonController();
 
   // late DeviceInfo deviceinfo;
-  var IP = "http://13.235.244.236:3000";
-  // var IP = "http://192.168.1.3:3000";
+  // var IP = "http://13.235.244.236:3000";
+  var IP = "https://home-latest-oqtmzyuusq-el.a.run.app";
 
   // final Uri _url = Uri.parse('http://proxy60.rt3.io:37278/');
-  final Uri _url = Uri.parse('http://192.168.1.3:5001/video_feed');
+  final Uri _url = Uri.parse('http://172.20.10.4:5001/video_feed');
   var dio = Dio();
   final firestoreInstance = FirebaseFirestore.instance;
   var orientation, size, height, width;
@@ -613,7 +613,14 @@ class deviceIconWidget extends StatelessWidget {
       'fan': CupertinoIcons.dial_fill,
       'tv': CupertinoIcons.tv,
     };
-    return Icon(iconMapping[icon], color: iconColoring[deviceState], size: 50);
+    Map<String, IconData> iconMappings = {
+      'lock': CupertinoIcons.lock,
+      'lamp': CupertinoIcons.lightbulb,
+      'fan': CupertinoIcons.dial_fill,
+      'tv': CupertinoIcons.tv,
+    };
+    return Icon(deviceState! ? iconMapping[icon] : iconMappings[icon],
+        color: iconColoring[deviceState], size: 50);
   }
 }
 

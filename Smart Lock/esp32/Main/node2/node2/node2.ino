@@ -10,8 +10,8 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);
 int variable = 0;
 
 // WiFi
-const char *ssid = "Raghavendiran"; // Enter your WiFi name
-const char *password = "apple@5g";  // Enter WiFi password
+const char *ssid = "Raghav"; // Enter your WiFi name
+const char *password = "qwertyuiop";  // Enter WiFi password
 
 const char *mqtt_broker = "13.233.193.140";
 const char *topic = "/lock/status";
@@ -26,12 +26,11 @@ void setup() {
    Serial.begin(115200);
    pinMode(4, OUTPUT);
 
-   digitalWrite(4, LOW);
+   digitalWrite(4, HIGH);
    SPI.begin();      
    mfrc522.PCD_Init(); 
    WiFi.begin(ssid, password);
    WifiConnect();
-   client.subscribe("/lock/publishStatus");
    client.subscribe("/lock/publishStatus");
 }
 
@@ -85,16 +84,17 @@ void callback(char *topic, byte *payload, unsigned int length) {
  }
  DynamicJsonDocument doc(1024); 
  deserializeJson(doc, message);
- bool state = doc["status"]; 
- const int deviceUID = doc["nodeId"];
- if(doc["nodeId"] == "0x02"){
+ Serial.println(message);
+ bool state = doc["deviceState"]; 
+ const char* deviceUID = doc["deviceID"];
+ if(doc["deviceID"] == "0x02"){
    Serial.println(state); 
-   if (state == true){
+   if (state){
           Serial.println("Lock is OPEN");
-          digitalWrite(4, HIGH);
-   }
-   else {
           digitalWrite(4, LOW);
+   }
+   else if(!state){
+          digitalWrite(4, HIGH);
           Serial.println("Lock is CLOSED");
    }
  }
