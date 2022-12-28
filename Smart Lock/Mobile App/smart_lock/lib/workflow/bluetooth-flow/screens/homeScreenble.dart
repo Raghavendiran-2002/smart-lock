@@ -14,7 +14,7 @@ class HomeScreenBluetooth extends StatefulWidget {
 
 class _HomeScreenBluetoothState extends State<HomeScreenBluetooth> {
   List<bool> deviceState = [false, false, false, false];
-  // late bool isBluetoothOn ;
+  List<int> deviceID = [1, 2, 3, 4];
   bool isBluetoothOn = true;
   final RoundedLoadingButtonController _btnController =
       RoundedLoadingButtonController();
@@ -68,11 +68,24 @@ class _HomeScreenBluetoothState extends State<HomeScreenBluetooth> {
                     onChanged: (val) {
                       setState(() {
                         deviceState[0] = val;
+                        BluetoothPackage.instance.writeWiFiCreds(val, 1);
                       });
                     },
-                  )
+                  ),
                 ],
-              )
+              ),
+              GridView.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisExtent: 100,
+                  crossAxisSpacing: 15.0,
+                  mainAxisSpacing: 15.0,
+                  childAspectRatio: 1,
+                ),
+                itemBuilder: (BuildContext context, int index) {
+                  return Text("Hi");
+                },
+              ),
             ],
           ),
         ),
@@ -116,7 +129,7 @@ class _HomeScreenBluetoothState extends State<HomeScreenBluetooth> {
             ),
             onPressed: () => Navigator.pop(context),
             width: 120,
-          )
+          ),
         ],
       ).show();
     }
