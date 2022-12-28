@@ -15,6 +15,7 @@ class HomeScreenBluetooth extends StatefulWidget {
 class _HomeScreenBluetoothState extends State<HomeScreenBluetooth> {
   List<bool> deviceState = [false, false, false, false];
   List<int> deviceID = [1, 2, 3, 4];
+  List deviceType = ["lamp", "fan", "tv", "lamp"];
   bool isBluetoothOn = true;
   final RoundedLoadingButtonController _btnController =
       RoundedLoadingButtonController();
@@ -61,30 +62,90 @@ class _HomeScreenBluetoothState extends State<HomeScreenBluetooth> {
                     "Connect",
                     style: TextStyle(color: Colors.white),
                   ),
-                  CupertinoButton(child: Text(""), onPressed: () {}),
-                  CupertinoSwitch(
-                    activeColor: Colors.white54,
-                    value: deviceState[0]!,
-                    onChanged: (val) {
-                      setState(() {
-                        deviceState[0] = val;
-                        BluetoothPackage.instance.writeWiFiCreds(val, 1);
-                      });
-                    },
-                  ),
                 ],
               ),
-              GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisExtent: 100,
-                  crossAxisSpacing: 15.0,
-                  mainAxisSpacing: 15.0,
-                  childAspectRatio: 1,
+              Expanded(
+                child: GridView.builder(
+                  // padding: EdgeInsets.symmetric(horizontal: 10),
+                  itemCount: 4,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisExtent: 100,
+                    crossAxisSpacing: 15.0,
+                    mainAxisSpacing: 15.0,
+                    childAspectRatio: 1,
+                  ),
+                  itemBuilder: (BuildContext context, int index) {
+                    return GestureDetector(
+                      onTap: () {
+                        bool val;
+                        deviceState[index] ? val = false : val = true;
+                        BluetoothPackage.instance.writeWiFiCreds(val, index);
+                        setState(() {
+                          deviceState[index] = val;
+                        });
+                      },
+                      child: Container(
+                        padding:
+                            EdgeInsets.symmetric(vertical: 6, horizontal: 15),
+                        decoration: BoxDecoration(
+                          color: deviceState[index]
+                              ? Color(0xFF6171DC)
+                              : Color(0xFFDBDBFC),
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                deviceIconWidget(
+                                    deviceType[index], deviceState[index]),
+                                Transform.scale(
+                                  scale: 1,
+                                  child: CupertinoSwitch(
+                                    activeColor: Colors.white54,
+                                    value: deviceState[index]!,
+                                    onChanged: (val) {
+                                      deviceState[index] = val;
+                                      BluetoothPackage.instance
+                                          .writeWiFiCreds(val, index);
+                                      setState(() {
+                                        deviceState[index] = val;
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                deviceState[index]!
+                                    ? Text(
+                                        "ON",
+                                        style: TextStyle(
+                                          color: Colors.white54,
+                                          fontSize: 12,
+                                        ),
+                                      )
+                                    : Text(
+                                        "OFF",
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 ),
-                itemBuilder: (BuildContext context, int index) {
-                  return Text("Hi");
-                },
               ),
             ],
           ),
@@ -133,5 +194,33 @@ class _HomeScreenBluetoothState extends State<HomeScreenBluetooth> {
         ],
       ).show();
     }
+  }
+}
+
+class deviceIconWidget extends StatelessWidget {
+  late String? icon;
+  late bool? deviceState;
+  deviceIconWidget(this.icon, this.deviceState);
+
+  @override
+  Widget build(BuildContext context) {
+    Map<bool, Color> iconColoring = {
+      true: Colors.white,
+      false: Color(0xFF6171DC),
+    };
+    Map<String, IconData> iconMapping = {
+      'lock': CupertinoIcons.lock,
+      'lamp': CupertinoIcons.lightbulb,
+      'fan': CupertinoIcons.dial_fill,
+      'tv': CupertinoIcons.tv,
+    };
+    Map<String, IconData> iconMappings = {
+      'lock': CupertinoIcons.lock,
+      'lamp': CupertinoIcons.lightbulb,
+      'fan': CupertinoIcons.dial_fill,
+      'tv': CupertinoIcons.tv,
+    };
+    return Icon(deviceState! ? iconMapping[icon] : iconMappings[icon],
+        color: iconColoring[deviceState], size: 50);
   }
 }
