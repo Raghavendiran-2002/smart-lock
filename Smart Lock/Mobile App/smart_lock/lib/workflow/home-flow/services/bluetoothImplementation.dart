@@ -6,6 +6,7 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 class CustomBluetoothImplementation {
   FlutterBluePlus flutterBlue = FlutterBluePlus.instance;
   late BluetoothDevice connectedDevice;
+
   void connectBLEDevice(BluetoothDevice device) async {
     await device.connect(autoConnect: false);
     initServiceCharacteristic(device);
@@ -60,7 +61,7 @@ class CustomBluetoothImplementation {
     bool isConnected = false;
     await flutterBlue.connectedDevices.then((value) {
       if (value.length != 0) {
-        if (value[0].id.toString() == "E0:E2:E6:0B:58:6E") {
+        if (value[0].id.toString() == "30:AE:A4:84:26:AA") {
           initServiceCharacteristic(value[0]);
           connectedDevice = value[0];
           isConnected = true;
@@ -71,7 +72,7 @@ class CustomBluetoothImplementation {
         flutterBlue.scanResults.listen((results) {
           for (ScanResult r in results) {
             print('Devicesss  : ${r}');
-            if (r.device.id.toString() == "E0:E2:E6:0B:58:6E" && isFirst) {
+            if (r.device.id.toString() == "30:AE:A4:84:26:AA" && isFirst) {
               print("Gotttttttttttt Youuuuuuuuuuu");
               connectedDevice = r.device;
               connectBLEDevice(r.device);
