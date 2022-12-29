@@ -5,7 +5,7 @@
 #include <BLEServer.h>
 #include <ArduinoJson.h>
 
-int led[4] = {12, 13, 14, 15};
+int led[4] = {2, 4, 18, 19};
 bool deviceState[4] = {false, false, false ,false};
 
 #define SERVICE_UUID        "28406d0e-73e1-11ed-a1eb-0242ac120002"
@@ -32,14 +32,44 @@ class MyCallbacks: public BLECharacteristicCallbacks {
        deserializeJson(doc, message);
        bool state = doc["deviceState"]; 
        int deviceUID = doc["deviceID"];
-       if(doc["deviceID"] == 1){
+       if(doc["deviceID"] == 0){
             if(state){
-              Serial.println("ON");
-              digitalWrite(1, HIGH);
+              Serial.println("d0 ON");
+              digitalWrite(2, LOW);
             }
             else{
-              Serial.println("OFF");
-              digitalWrite(1, LOW);
+              Serial.println("d0 OFF");
+              digitalWrite(2, HIGH);
+            }
+        }
+        if(doc["deviceID"] == 1){
+            if(state){
+              Serial.println("d1 ON");
+              digitalWrite(4, LOW);
+            }
+            else{
+              Serial.println("d1 OFF");
+              digitalWrite(4, HIGH);
+            }
+        }
+        if(doc["deviceID"] == 2){
+            if(state){
+              Serial.println("d2 ON");
+              digitalWrite(18, LOW);
+            }
+            else{
+              Serial.println("d2 OFF");
+              digitalWrite(18, HIGH);
+            }
+        }
+        if(doc["deviceID"] == 3){
+            if(state){
+              Serial.println("d3 ON");
+              digitalWrite(19, LOW);
+            }
+            else{
+              Serial.println("d3 OFF");
+              digitalWrite(19, HIGH);
             }
         }
       }
@@ -54,18 +84,20 @@ class MyServerCallbacks: public BLEServerCallbacks {
       pAdvertising->start();
     }
 };
-
+void reset(){
+  digitalWrite(2, HIGH);
+  digitalWrite(4, HIGH);
+  digitalWrite(18, HIGH);
+  digitalWrite(19, HIGH);
+}
 
 void setup() {
-  pinMode(led[1], OUTPUT);
-  pinMode(led[2], OUTPUT);
-  pinMode(led[3], OUTPUT);
-  pinMode(led[4], OUTPUT);
-  digitalWrite(led[1], LOW);
-  digitalWrite(led[2], LOW);
-  digitalWrite(led[3], LOW);
-  digitalWrite(led[4], LOW);
+  pinMode(2, OUTPUT);
+  pinMode(4, OUTPUT);
+  pinMode(18, OUTPUT);
+  pinMode(19, OUTPUT);
   Serial.begin(115200);
+  reset();
 
   Serial.println("Bluetooth Started!!!!");
 

@@ -41,21 +41,35 @@ class _HomeScreenBluetoothState extends State<HomeScreenBluetooth> {
         child: Center(
           child: Column(
             children: [
-              Container(
-                padding: EdgeInsets.symmetric(vertical: 20, horizontal: 60),
-                decoration: BoxDecoration(
-                  color: BluetoothPackage.instance.isConnected
-                      ? Color(0xFFDBDBFC)
-                      : Color(0xFFC5A0AA),
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Text(
-                  BluetoothPackage.instance.isConnected
-                      ? "Connect"
-                      : "Disconnected",
-                  style: TextStyle(color: Colors.black),
-                ),
-              ),
+              BluetoothPackage.instance.isDisconnected
+                  ? Container(
+                      padding:
+                          EdgeInsets.symmetric(vertical: 20, horizontal: 60),
+                      decoration: BoxDecoration(
+                        color: Color(0xFFC5A0AA),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Text(
+                        "Disconnected",
+                        style: TextStyle(color: Colors.black),
+                      ),
+                    )
+                  : Container(
+                      padding:
+                          EdgeInsets.symmetric(vertical: 20, horizontal: 60),
+                      decoration: BoxDecoration(
+                        color: BluetoothPackage.instance.isConnected
+                            ? Color(0xFFDBDBFC)
+                            : Color(0xFFA7C4AD),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Text(
+                        BluetoothPackage.instance.isConnected
+                            ? "Connect"
+                            : "Reconnecting",
+                        style: TextStyle(color: Colors.black),
+                      ),
+                    ),
               Expanded(
                 child: GridView.builder(
                   // padding: EdgeInsets.symmetric(horizontal: 10),

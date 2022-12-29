@@ -4,6 +4,7 @@ class BluetoothPackage {
   FlutterBluePlus flutterBlue = FlutterBluePlus.instance;
   late BluetoothDevice connectedDevice;
   bool isConnected = false;
+  bool isDisconnected = true;
 
   void connectBLEDevice(BluetoothDevice device) async {
     // await device.connect();
@@ -12,7 +13,7 @@ class BluetoothPackage {
       await Future.delayed(Duration(seconds: 2));
       discoverDevice();
     });
-
+    isDisconnected = false;
     initServiceCharacteristic(device);
   }
 
@@ -43,9 +44,12 @@ class BluetoothPackage {
     await flutterBlue.connectedDevices.then((value) {
       value.forEach((BluetoothDevice eachDevice) {
         if (eachDevice.id.toString() == "E0:E2:E6:0B:58:6E") {
+          isDisconnected = false;
           connectedDevice = eachDevice;
           isConnected = true;
         } else {
+          isDisconnected = true;
+          isConnected = false;
           discoverDevice();
         }
       });
@@ -57,6 +61,7 @@ class BluetoothPackage {
     for (int j = 0; j < services.length; j++) {
       if (services[j].uuid.toString() ==
           "28406d0e-73e1-11ed-a1eb-0242ac120002") {
+        isDisconnected = false;
         List<BluetoothCharacteristic> characteristicsList =
             services[j].characteristics;
         for (int i = 0; i < characteristicsList.length; i++) {
@@ -64,15 +69,22 @@ class BluetoothPackage {
               "beb5483e-36e1-4688-b7f5-ea07361b26a8") {
             final json =
                 '{ "deviceState": $deviceState , "deviceID": $deviceID}';
-            await characteristicsList[i].write(json.codeUnits);
-            print("************************************************");
+            try {
+              await characteristicsList[i].write(json.codeUnits);
+              isConnected = true;
+            } catch (e) {
+              print(e);
+              print('*********');
+              if (e == "Exception: Failed to write the characteristic") {
+                isConnected = false;
+                // connectBLEDevice(connectedDevice);
+              }
+            }
             List<int> value = await characteristicsList[i].read();
-            isConnected = true;
+
             var verifyValue = String.fromCharCodes(value);
             if (verifyValue == json) {
             } else {}
-
-            print("************************************************");
           }
         }
       }
@@ -118,16 +130,18 @@ class BluetoothPackage {
       value.forEach((BluetoothDevice eachDevice) {
         if (eachDevice.id.toString() == "E0:E2:E6:0B:58:6E") {
           initServiceCharacteristic(eachDevice);
+          isDisconnected = false;
           connectedDevice = eachDevice;
           isConnected = true;
         }
       });
-      flutterBlue.startScan(timeout: Duration(seconds: 1));
+      flutterBlue.startScan(timeout: Duration(seconds: 10));
       bool isFirst = true;
       flutterBlue.scanResults.listen((results) {
         for (ScanResult r in results) {
           // print('Devicesss  : ${r}');
-          if (r.device.id.toString() == "E0:E2:E6:0B:58:6E" && isFirst) {
+          if (r.device.name.toString() == "MyESP32" && isFirst) {
+            isDisconnected = false;
             isConnected = true;
             connectBLEDevice(r.device);
             connectedDevice = r.device;
