@@ -27,7 +27,6 @@ class BluetoothPackage {
         for (int i = 0; i < characteristicsList.length; i++) {
           if (characteristicsList[i].uuid.toString() ==
               "beb5483e-36e1-4688-b7f5-ea07361b26a8") {
-            print("readinggggg");
             List<int> value = await characteristicsList[i].read();
             var results = String.fromCharCodes(value);
             print(results);
@@ -43,7 +42,7 @@ class BluetoothPackage {
   void isDeviceConnected() async {
     await flutterBlue.connectedDevices.then((value) {
       value.forEach((BluetoothDevice eachDevice) {
-        if (eachDevice.id.toString() == "E0:E2:E6:0B:58:6E") {
+        if (eachDevice.id.toString() == "94:B9:7E:D5:CD:F6") {
           isDisconnected = false;
           connectedDevice = eachDevice;
           isConnected = true;
@@ -80,11 +79,11 @@ class BluetoothPackage {
                 // connectBLEDevice(connectedDevice);
               }
             }
-            List<int> value = await characteristicsList[i].read();
-
-            var verifyValue = String.fromCharCodes(value);
-            if (verifyValue == json) {
-            } else {}
+            // List<int> value = await characteristicsList[i].read();
+            //
+            // var verifyValue = String.fromCharCodes(value);
+            // if (verifyValue == json) {
+            // } else {}
           }
         }
       }
@@ -128,7 +127,7 @@ class BluetoothPackage {
   void discoverDevice() async {
     await flutterBlue.connectedDevices.then((value) {
       value.forEach((BluetoothDevice eachDevice) {
-        if (eachDevice.id.toString() == "E0:E2:E6:0B:58:6E") {
+        if (eachDevice.id.toString() == "94:B9:7E:D5:CD:F6") {
           initServiceCharacteristic(eachDevice);
           isDisconnected = false;
           connectedDevice = eachDevice;
@@ -139,8 +138,8 @@ class BluetoothPackage {
       bool isFirst = true;
       flutterBlue.scanResults.listen((results) {
         for (ScanResult r in results) {
-          // print('Devicesss  : ${r}');
-          if (r.device.name.toString() == "MyESP32" && isFirst) {
+          print('Devicesss  : ${r}');
+          if (r.device.id.toString() == "94:B9:7E:D5:CD:F6" && isFirst) {
             isDisconnected = false;
             isConnected = true;
             connectBLEDevice(r.device);

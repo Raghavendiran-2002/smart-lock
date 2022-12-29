@@ -153,6 +153,23 @@ class _HomeScreenBluetoothState extends State<HomeScreenBluetooth> {
                   },
                 ),
               ),
+              GestureDetector(
+                onTap: () {
+                  connectBluetoothDevice();
+                  BluetoothPackage.instance.isDeviceConnected();
+                },
+                child: Container(
+                  padding: EdgeInsets.symmetric(vertical: 20, horizontal: 60),
+                  decoration: BoxDecoration(
+                    color: Color(0xFF6171DC),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Text(
+                    "Reconnect",
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ),
+              )
             ],
           ),
         ),
