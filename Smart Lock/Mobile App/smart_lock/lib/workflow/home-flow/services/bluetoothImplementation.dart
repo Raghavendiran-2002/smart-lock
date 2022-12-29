@@ -13,7 +13,6 @@ class CustomBluetoothImplementation {
   }
 
   void initServiceCharacteristic(Device) async {
-    bool isMsgSent = false;
     List<BluetoothService> services = await Device.discoverServices();
     if (services[0].uuid.toString() == "28406d0e-73e1-11ed-a1eb-0242ac120002") {
       List<BluetoothCharacteristic> characteristics =

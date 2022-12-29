@@ -43,6 +43,7 @@ class MyCallbacks: public BLECharacteristicCallbacks {
             }
         }
       }
+      
     
 };
 class MyServerCallbacks: public BLEServerCallbacks {   
@@ -83,12 +84,10 @@ void setup() {
   pServer->setCallbacks(new MyServerCallbacks());
 
 
-  DynamicJsonDocument doc(1024);
-  doc["deviceUID"] = "";
-  doc["deviceState"] = "0x01";
-  char message[100];
-  serializeJson(doc, message);
-  pCharacteristic->setValue(message);
+  
+  char messages[25] = "Connected";
+
+  pCharacteristic->setValue(messages);
   pService->start();
   pAdvertising = pServer->getAdvertising();
   pAdvertising->start();

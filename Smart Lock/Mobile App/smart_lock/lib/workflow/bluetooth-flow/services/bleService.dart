@@ -1,21 +1,23 @@
-import 'dart:convert';
-import 'dart:math';
-
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 class BluetoothPackage {
   FlutterBluePlus flutterBlue = FlutterBluePlus.instance;
-  // late BluetoothDevice connectedDevice;
   late BluetoothDevice connectedDevice;
+  bool isConnected = false;
+
   void connectBLEDevice(BluetoothDevice device) async {
-    print("Connecting");
-    await device.connect(autoConnect: false);
+    // await device.connect();
+    await device.connect(autoConnect: true).catchError((error) async {
+      await device.disconnect();
+      await Future.delayed(Duration(seconds: 2));
+      discoverDevice();
+    });
+
     initServiceCharacteristic(device);
   }
 
   void initServiceCharacteristic(Device) async {
     List<BluetoothService> services = await Device.discoverServices();
-
     for (int j = 0; j < services.length; j++) {
       if (services[j].uuid.toString() ==
           "28406d0e-73e1-11ed-a1eb-0242ac120002") {
@@ -24,19 +26,34 @@ class BluetoothPackage {
         for (int i = 0; i < characteristicsList.length; i++) {
           if (characteristicsList[i].uuid.toString() ==
               "beb5483e-36e1-4688-b7f5-ea07361b26a8") {
-            readValue(characteristicsList[i]);
+            print("readinggggg");
+            List<int> value = await characteristicsList[i].read();
+            var results = String.fromCharCodes(value);
+            print(results);
+            // Map<String, dynamic> result = jsonDecode(results);
+            // print("${result['deviceState']}");
+            flutterBlue.stopScan();
           }
         }
       }
     }
   }
 
-  void writeWiFiCreds(deviceState, deviceID) async {
-    print(connectedDevice);
-    List<BluetoothService> services = await connectedDevice.discoverServices();
-    print(services);
-    print(services.length);
+  void isDeviceConnected() async {
+    await flutterBlue.connectedDevices.then((value) {
+      value.forEach((BluetoothDevice eachDevice) {
+        if (eachDevice.id.toString() == "E0:E2:E6:0B:58:6E") {
+          connectedDevice = eachDevice;
+          isConnected = true;
+        } else {
+          discoverDevice();
+        }
+      });
+    });
+  }
 
+  void actuateRelay(deviceState, deviceID) async {
+    List<BluetoothService> services = await connectedDevice.discoverServices();
     for (int j = 0; j < services.length; j++) {
       if (services[j].uuid.toString() ==
           "28406d0e-73e1-11ed-a1eb-0242ac120002") {
@@ -47,9 +64,15 @@ class BluetoothPackage {
               "beb5483e-36e1-4688-b7f5-ea07361b26a8") {
             final json =
                 '{ "deviceState": $deviceState , "deviceID": $deviceID}';
-            var k = jsonDecode(json);
-            print(k['deviceState']);
             await characteristicsList[i].write(json.codeUnits);
+            print("************************************************");
+            List<int> value = await characteristicsList[i].read();
+            isConnected = true;
+            var verifyValue = String.fromCharCodes(value);
+            if (verifyValue == json) {
+            } else {}
+
+            print("************************************************");
           }
         }
       }
@@ -82,30 +105,15 @@ class BluetoothPackage {
     print(String.fromCharCodes(value));
   }
 
-  List<int> _getRandomBytes() {
-    final math = Random();
-    return [
-      math.nextInt(255),
-      math.nextInt(255),
-      math.nextInt(255),
-      math.nextInt(255)
-    ];
-  }
-
   void writeValue(
       var deviceID, var deviceState, BluetoothCharacteristic ble) async {
     print("Startted");
     final json = '{ "deviceState": $deviceState , "deviceID": $deviceID}';
-    var k = jsonDecode(json);
-    print(k['deviceState']);
-
     await ble.write([0, 0], withoutResponse: true);
-    // print(); // deviceState
     // await ble.write(msg.codeUnits);
   }
 
   void discoverDevice() async {
-    late bool isConnected;
     await flutterBlue.connectedDevices.then((value) {
       value.forEach((BluetoothDevice eachDevice) {
         if (eachDevice.id.toString() == "E0:E2:E6:0B:58:6E") {
@@ -114,28 +122,19 @@ class BluetoothPackage {
           isConnected = true;
         }
       });
-
       flutterBlue.startScan(timeout: Duration(seconds: 1));
       bool isFirst = true;
       flutterBlue.scanResults.listen((results) {
         for (ScanResult r in results) {
           // print('Devicesss  : ${r}');
           if (r.device.id.toString() == "E0:E2:E6:0B:58:6E" && isFirst) {
-            print("Gotttttttttttt Youuuuuuuuuuu");
-            connectedDevice = r.device;
-            connectBLEDevice(r.device);
             isConnected = true;
-            isFirst = false;
-            // flutterBlue.stopScan();
-            // initServiceCharacteristic(value[0]);
-            // break;
+            connectBLEDevice(r.device);
+            connectedDevice = r.device;
           }
         }
       });
     });
-    // isConnected == null ? isConnected = true : isConnected = false;
-    // print(isConnected);
-    // return isConnected;
   }
 
   BluetoothPackage._();

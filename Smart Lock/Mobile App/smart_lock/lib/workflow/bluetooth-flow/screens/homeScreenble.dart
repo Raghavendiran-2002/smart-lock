@@ -1,8 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:rflutter_alert/rflutter_alert.dart';
-import 'package:rounded_loading_button/rounded_loading_button.dart';
 import 'package:smart_lock/workflow/bluetooth-flow/services/bleService.dart';
 
 class HomeScreenBluetooth extends StatefulWidget {
@@ -16,27 +14,23 @@ class _HomeScreenBluetoothState extends State<HomeScreenBluetooth> {
   List<bool> deviceState = [false, false, false, false];
   List<int> deviceID = [1, 2, 3, 4];
   List deviceType = ["lamp", "fan", "tv", "lamp"];
-  bool isBluetoothOn = true;
-  final RoundedLoadingButtonController _btnController =
-      RoundedLoadingButtonController();
 
   @override
   void initState() {
-    isBluetoothON();
-    ConnectDevice("28406d0e-73e1-11ed-a1eb-0242ac120002", _btnController);
+    connectBluetoothDevice();
+    BluetoothPackage.instance.isDeviceConnected();
   }
 
-  void isBluetoothON() async {
-    bool blestate = await FlutterBluePlus.instance.isOn;
-    print(blestate);
-    setState(() {
-      isBluetoothOn = blestate;
-    });
+  void connectBluetoothDevice() async {
+    bool bluetoothON = await FlutterBluePlus.instance.isOn;
+    bluetoothON
+        ? BluetoothPackage.instance.discoverDevice()
+        : reconnectDevice();
   }
 
-  void turnBluetoothON() {
+  void reconnectDevice() {
     FlutterBluePlus.instance.turnOn();
-    print("Turinmdlgnsdk;");
+    connectBluetoothDevice();
   }
 
   @override
@@ -47,22 +41,20 @@ class _HomeScreenBluetoothState extends State<HomeScreenBluetooth> {
         child: Center(
           child: Column(
             children: [
-              ElevatedButton(
-                onPressed: () {
-                  BluetoothPackage.instance.writeWiFiCreds("hei", "ifdohj");
-                  // ConnectDevice(
-                  //     "28406d0e-73e1-11ed-a1eb-0242ac120002", _btnController);
-                  print("connected");
-                },
-                child: Text("Connect"),
-              ),
-              Row(
-                children: [
-                  Text(
-                    "Connect",
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ],
+              Container(
+                padding: EdgeInsets.symmetric(vertical: 20, horizontal: 60),
+                decoration: BoxDecoration(
+                  color: BluetoothPackage.instance.isConnected
+                      ? Color(0xFFDBDBFC)
+                      : Color(0xFFC5A0AA),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Text(
+                  BluetoothPackage.instance.isConnected
+                      ? "Connect"
+                      : "Disconnected",
+                  style: TextStyle(color: Colors.black),
+                ),
               ),
               Expanded(
                 child: GridView.builder(
@@ -80,7 +72,7 @@ class _HomeScreenBluetoothState extends State<HomeScreenBluetooth> {
                       onTap: () {
                         bool val;
                         deviceState[index] ? val = false : val = true;
-                        BluetoothPackage.instance.writeWiFiCreds(val, index);
+                        BluetoothPackage.instance.actuateRelay(val, index);
                         setState(() {
                           deviceState[index] = val;
                         });
@@ -107,11 +99,11 @@ class _HomeScreenBluetoothState extends State<HomeScreenBluetooth> {
                                   scale: 1,
                                   child: CupertinoSwitch(
                                     activeColor: Colors.white54,
-                                    value: deviceState[index]!,
+                                    value: deviceState[index],
                                     onChanged: (val) {
                                       deviceState[index] = val;
                                       BluetoothPackage.instance
-                                          .writeWiFiCreds(val, index);
+                                          .actuateRelay(val, index);
                                       setState(() {
                                         deviceState[index] = val;
                                       });
@@ -123,7 +115,7 @@ class _HomeScreenBluetoothState extends State<HomeScreenBluetooth> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
-                                deviceState[index]!
+                                deviceState[index]
                                     ? Text(
                                         "ON",
                                         style: TextStyle(
@@ -152,48 +144,6 @@ class _HomeScreenBluetoothState extends State<HomeScreenBluetooth> {
         ),
       ),
     );
-  }
-
-  void ConnectDevice(
-      uniqueCode, RoundedLoadingButtonController controller) async {
-    Future<bool> isConnected;
-    if (isBluetoothOn == true) {
-      BluetoothPackage.instance.discoverDevice();
-      // .discoverDevice("28406d0e-73e1-11ed-a1eb-0242ac120002");
-      print("*****************************************");
-      // print(await isConnected);
-      print("*****************************************");
-      // BluetoothPackage.instance.writeWiFiCreds("hei", "ifdohj");
-      // CustomBluetoothImplementation.instance.writeValue("Helloworld!!",)
-
-    } else {
-      Alert(
-        context: context,
-        type: AlertType.error,
-        title: "bluetooth is turned off",
-        buttons: [
-          DialogButton(
-            child: Text(
-              "turn on",
-              style: TextStyle(color: Colors.white, fontSize: 20),
-            ),
-            onPressed: () {
-              turnBluetoothON();
-              Navigator.pop(context);
-            },
-            width: 120,
-          ),
-          DialogButton(
-            child: Text(
-              "close",
-              style: TextStyle(color: Colors.white, fontSize: 20),
-            ),
-            onPressed: () => Navigator.pop(context),
-            width: 120,
-          ),
-        ],
-      ).show();
-    }
   }
 }
 
