@@ -56,6 +56,17 @@ class BluetoothPackage {
   }
 
   void actuateRelay(deviceState, deviceID) async {
+    await flutterBlue.connectedDevices.then((value) {
+      value.forEach((BluetoothDevice eachDevice) {
+        print(eachDevice.id);
+        if (eachDevice.id.toString() == "94:B9:7E:D5:CD:F6") {
+          isDisconnected = false;
+        } else {
+          isDisconnected = true;
+        }
+      });
+    });
+
     List<BluetoothService> services = await connectedDevice.discoverServices();
     for (int j = 0; j < services.length; j++) {
       if (services[j].uuid.toString() ==
@@ -74,9 +85,9 @@ class BluetoothPackage {
             } catch (e) {
               print(e);
               print('*********');
+              isDisconnected = true;
               if (e == "Exception: Failed to write the characteristic") {
                 isConnected = false;
-                // connectBLEDevice(connectedDevice);
               }
             }
             // List<int> value = await characteristicsList[i].read();
@@ -134,11 +145,11 @@ class BluetoothPackage {
           isConnected = true;
         }
       });
-      flutterBlue.startScan(timeout: Duration(seconds: 10));
+      flutterBlue.startScan(timeout: Duration(seconds: 1));
       bool isFirst = true;
       flutterBlue.scanResults.listen((results) {
         for (ScanResult r in results) {
-          print('Devicesss  : ${r}');
+          // print('Devicesss  : ${r}');
           if (r.device.id.toString() == "94:B9:7E:D5:CD:F6" && isFirst) {
             isDisconnected = false;
             isConnected = true;
